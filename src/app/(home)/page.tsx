@@ -16,7 +16,7 @@ const page =()=>{
 
             
             </div>
-            <h1 className="text-2xl md:text-5xl font-bold text-center ">Build Something with Vibe</h1>
+            <h1 className="text-2xl md:text-5xl font-bold text-center ">Build Something with Vibel</h1>
             <p className="text-lg md:text-xl text-muted-foreground text-center ">Create website by chatting with AI</p>
             <div className="max-w-3xl mx-auto w-full">
               <ProjectForm/>

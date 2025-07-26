@@ -1,11 +1,11 @@
-# Vibe
+# Vibel
 
-**English** | [हिंदी नीचे](#वाइब---हिंदी)
+**English** | [हिंदी नीचे](#वाइबेल---हिंदी)
 
 ---
 
-## What is Vibe?
-Vibe is a modern web application that lets you create websites simply by chatting with AI. It combines the power of Next.js, Clerk authentication, and TRPC APIs to provide a seamless, interactive, and collaborative experience for building and managing projects.
+## What is Vibel?
+Vibel is a modern web application that lets you create websites simply by chatting with AI. It combines the power of Next.js, Clerk authentication, and TRPC APIs to provide a seamless, interactive, and collaborative experience for building and managing projects.
 
 ## Features
 - **AI-powered Website Creation:** Build websites by having a conversation with an AI assistant.
@@ -61,10 +61,10 @@ See [LICENSE](./LICENSE) for details.
 
 ---
 
-# वाइब - हिंदी
+# वाइबेल - हिंदी
 
-## वाइब क्या है?
-वाइब एक आधुनिक वेब एप्लिकेशन है जो आपको AI के साथ चैट करके वेबसाइट बनाने देता है। इसमें Next.js, Clerk ऑथेंटिकेशन और TRPC API का उपयोग करके प्रोजेक्ट बनाना और प्रबंधित करना बेहद आसान है।
+## वाइबेल क्या है?
+वाइबेल एक आधुनिक वेब एप्लिकेशन है जो आपको AI के साथ चैट करके वेबसाइट बनाने देता है। इसमें Next.js, Clerk ऑथेंटिकेशन और TRPC API का उपयोग करके प्रोजेक्ट बनाना और प्रबंधित करना बेहद आसान है।
 
 ## मुख्य विशेषताएँ
 - **AI से वेबसाइट बनाएं:** AI असिस्टेंट से बात करके वेबसाइट बनाएं।
