@@ -3,7 +3,7 @@ import {prisma} from "./db";
 import { auth } from "@clerk/nextjs/server";
 const FREE_POINTS = 5;
 const PRO_POINTS = 100;
-const DURATION = 30 * 60 * 60 * 24;
+const DURATION = 30 * 60; // 30 minutes
 const GENERATION_COST = 1;
 
 export async function getUsageTracker(){

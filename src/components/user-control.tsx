@@ -9,6 +9,7 @@ interface Props{
 
 export const UserControl = ({ShowName}:Props)=>{
     const currentTheme = useCurrentTheme();
+       // READ ONLY: Checking for plan and sandbox logic
     return(
         <UserButton 
         showName={ShowName}
