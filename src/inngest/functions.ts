@@ -30,7 +30,7 @@ export const CodeAgentFunction = inngest.createFunction(
         projectId: event.data.projectId,
       },
       orderBy:{
-        createdAt:"desc",
+        createdAt:"asc",   // desc to asc
       },
     })
     for (const message of messages) {
