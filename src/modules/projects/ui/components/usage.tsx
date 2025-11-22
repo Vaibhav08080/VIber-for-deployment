@@ -21,16 +21,19 @@ export const Usage = ({ points, msBeforeNext }: Props) => {
                 {points} {hasProAccess ? "" : "free"} credits remaining
             </p>
             <p className="text-xs text-muted-foreground">
-                Resets in{""}
-
-                {formatDuration(intervalToDuration({
+                Resets in{" "}
+                {formatDuration(
+                  intervalToDuration({ //changes made here
                     start: new Date(),
-                    end: new Date(Date.now() + msBeforeNext)
-                }),
-                {
-                    format:["months","days","hours","minutes"]  // changed here 
-                    
-                }
+                    end: new Date(Date.now() + msBeforeNext),
+                  }),
+                  {
+                    // include seconds so very short durations show up,
+                    // and keep minutes/hours/days/months
+                    format: ["months", "days", "hours", "minutes", "seconds"],
+                    // if you prefer to show only the most-significant unit, 
+                    // you can use `zero: true` / custom logic, or trim the result
+                  }
                 )}
             </p>
         </div>
