@@ -7,7 +7,7 @@ export const CinematicBackground = () => {
   const shaderCanvasRef = useRef<HTMLCanvasElement>(null);
   const particleContainerRef = useRef<HTMLDivElement>(null);
 
-  // WebGL Background Shader
+  // 1. WebGL Dark Ambient Shader
   useEffect(() => {
     const canvas = shaderCanvasRef.current;
     if (!canvas) return;
@@ -66,21 +66,21 @@ export const CinematicBackground = () => {
         vec2 uv = v_texCoord;
         vec2 mouse = u_mouse / u_resolution;
         
-        // Base dark matte color
-        vec3 color = vec3(0.035, 0.035, 0.035); // #090909
+        // Base dark matte color (#090909)
+        vec3 color = vec3(0.035, 0.035, 0.035);
         
-        // Subtle radial spotlight following mouse
+        // Mouse-following radial spotlight with orange glow
         float dist = distance(uv, mouse);
-        float spotlight = smoothstep(0.6, 0.0, dist) * 0.05;
-        color += vec3(1.0, 0.41, 0.24) * spotlight; // Orange tint
+        float spotlight = smoothstep(0.65, 0.0, dist) * 0.08;
+        color += vec3(1.0, 0.41, 0.24) * spotlight;
         
-        // Fixed ambient spotlight
-        float ambientSpot = smoothstep(0.8, 0.0, distance(uv, vec2(0.5, 0.8))) * 0.025;
-        color += vec3(1.0) * ambientSpot;
+        // Center ambient spotlight behind hero
+        float ambientSpot = smoothstep(0.85, 0.0, distance(uv, vec2(0.5, 0.6))) * 0.04;
+        color += vec3(1.0, 0.41, 0.24) * ambientSpot;
 
-        // Fine paper grain noise
-        float n = noise(uv * 800.0 + u_time * 0.1);
-        color += (n - 0.5) * 0.02;
+        // Fine paper film grain noise
+        float n = noise(uv * 900.0 + u_time * 0.15);
+        color += (n - 0.5) * 0.025;
         
         gl_FragColor = vec4(color, 1.0);
       }
@@ -150,7 +150,7 @@ export const CinematicBackground = () => {
     };
   }, []);
 
-  // Three.js Particle System
+  // 2. Three.js Glowing Orange Square Pixel Particle Clusters
   useEffect(() => {
     const container = particleContainerRef.current;
     if (!container) return;
@@ -168,19 +168,42 @@ export const CinematicBackground = () => {
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Clear previous children if any
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
     container.appendChild(renderer.domElement);
 
-    const particlesCount = 200;
+    // Create crisp square particle texture
+    const createSquareTexture = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 32;
+      canvas.height = 32;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = "#FF6A3D";
+        ctx.fillRect(0, 0, 32, 32);
+      }
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    };
+
+    const squareTexture = createSquareTexture();
+
+    const particlesCount = 280;
     const positions = new Float32Array(particlesCount * 3);
+    const originalY = new Float32Array(particlesCount);
+    const speed = new Float32Array(particlesCount);
 
     for (let i = 0; i < particlesCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 15;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 5;
+      const x = (Math.random() - 0.5) * 22;
+      const y = (Math.random() - 0.5) * 16;
+      const z = (Math.random() - 0.5) * 10;
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+      originalY[i] = y;
+      speed[i] = 0.2 + Math.random() * 0.8;
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -188,10 +211,12 @@ export const CinematicBackground = () => {
 
     const material = new THREE.PointsMaterial({
       color: 0xff6a3d,
-      size: 0.06,
+      size: 0.22,
+      map: squareTexture,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.75,
       blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
 
     const particleSystem = new THREE.Points(geometry, material);
@@ -216,14 +241,28 @@ export const CinematicBackground = () => {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("resize", handleResize);
 
+    let clock = new THREE.Clock();
+
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
 
-      particleSystem.rotation.y += 0.001;
-      particleSystem.rotation.x += 0.0005;
+      // Gentle floating sine motion for individual particles
+      const posAttr = geometry.attributes.position as THREE.BufferAttribute;
+      const posArray = posAttr.array as Float32Array;
 
-      particleSystem.position.x += (mouseX * 0.5 - particleSystem.position.x) * 0.05;
-      particleSystem.position.y += (-mouseY * 0.5 - particleSystem.position.y) * 0.05;
+      for (let i = 0; i < particlesCount; i++) {
+        posArray[i * 3 + 1] = originalY[i] + Math.sin(elapsedTime * speed[i] + i) * 0.3;
+      }
+      posAttr.needsUpdate = true;
+
+      // Slow cluster rotation
+      particleSystem.rotation.y = elapsedTime * 0.02;
+      particleSystem.rotation.x = elapsedTime * 0.01;
+
+      // Parallax interaction with mouse
+      particleSystem.position.x += (mouseX * 0.8 - particleSystem.position.x) * 0.05;
+      particleSystem.position.y += (-mouseY * 0.8 - particleSystem.position.y) * 0.05;
 
       renderer.render(scene, camera);
     };
@@ -234,6 +273,7 @@ export const CinematicBackground = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationFrameId);
+      squareTexture.dispose();
       renderer.dispose();
       geometry.dispose();
       material.dispose();
@@ -243,16 +283,16 @@ export const CinematicBackground = () => {
   return (
     <div className="fixed inset-0 z-[-2] pointer-events-none overflow-hidden">
       {/* WebGL Shader Layer */}
-      <div className="absolute inset-0 w-full h-full opacity-60">
+      <div className="absolute inset-0 w-full h-full opacity-70">
         <canvas ref={shaderCanvasRef} className="block w-full h-full" />
       </div>
 
-      {/* Three.js Particle System */}
+      {/* Three.js Square Particle System */}
       <div className="absolute inset-0 w-full h-full">
         <div ref={particleContainerRef} className="w-full h-full" />
       </div>
 
-      {/* Grain Overlay */}
+      {/* Film Grain Noise Overlay */}
       <div className="grain-overlay absolute inset-0" />
     </div>
   );
