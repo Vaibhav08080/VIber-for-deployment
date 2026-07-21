@@ -1,14 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { useTheme } from "next-themes";
 
 export const CinematicBackground = () => {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const shaderCanvasRef = useRef<HTMLCanvasElement>(null);
   const particleContainerRef = useRef<HTMLDivElement>(null);
 
-  // 1. WebGL Dark Ambient Shader
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isLight = mounted && resolvedTheme === "light";
+
+  // 1. WebGL Dark Ambient Shader (Runs only in Dark Mode)
+  useEffect(() => {
+    if (isLight) return;
+
     const canvas = shaderCanvasRef.current;
     if (!canvas) return;
 
@@ -69,18 +80,13 @@ export const CinematicBackground = () => {
         // Base dark matte color (#090909)
         vec3 color = vec3(0.035, 0.035, 0.035);
         
-        // Mouse-following radial spotlight with orange glow
-        float dist = distance(uv, mouse);
-        float spotlight = smoothstep(0.65, 0.0, dist) * 0.12;
-        color += vec3(1.0, 0.41, 0.24) * spotlight;
-        
-        // Center ambient spotlight behind hero text
-        float ambientSpot = smoothstep(0.85, 0.0, distance(uv, vec2(0.5, 0.6))) * 0.06;
+        // Subtle ambient spotlight
+        float ambientSpot = smoothstep(0.85, 0.0, distance(uv, vec2(0.5, 0.6))) * 0.04;
         color += vec3(1.0, 0.41, 0.24) * ambientSpot;
 
         // Fine paper film grain noise
         float n = noise(uv * 900.0 + u_time * 0.15);
-        color += (n - 0.5) * 0.025;
+        color += (n - 0.5) * 0.015;
         
         gl_FragColor = vec4(color, 1.0);
       }
@@ -148,10 +154,12 @@ export const CinematicBackground = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isLight]);
 
-  // 2. Three.js Glowing Orange Square Pixel Particle Clusters
+  // 2. Three.js Subtle Orange Square Pixel Particles (24 particles max for extreme speed)
   useEffect(() => {
+    if (isLight) return;
+
     const container = particleContainerRef.current;
     if (!container) return;
 
@@ -164,9 +172,9 @@ export const CinematicBackground = () => {
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.z = 8;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
     while (container.firstChild) {
       container.removeChild(container.firstChild);
@@ -176,12 +184,12 @@ export const CinematicBackground = () => {
     // Create crisp square particle texture
     const createSquareTexture = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = 32;
-      canvas.height = 32;
+      canvas.width = 16;
+      canvas.height = 16;
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.fillStyle = "#FF6A3D";
-        ctx.fillRect(0, 0, 32, 32);
+        ctx.fillRect(0, 0, 16, 16);
       }
       const texture = new THREE.CanvasTexture(canvas);
       texture.needsUpdate = true;
@@ -190,20 +198,21 @@ export const CinematicBackground = () => {
 
     const squareTexture = createSquareTexture();
 
-    const particlesCount = 350;
+    // Very subtle, few orange floating squares matching reference screenshot
+    const particlesCount = 24;
     const positions = new Float32Array(particlesCount * 3);
     const originalY = new Float32Array(particlesCount);
     const speed = new Float32Array(particlesCount);
 
     for (let i = 0; i < particlesCount; i++) {
-      const x = (Math.random() - 0.5) * 26;
-      const y = (Math.random() - 0.5) * 18;
-      const z = (Math.random() - 0.5) * 12;
+      const x = (Math.random() - 0.5) * 16;
+      const y = (Math.random() - 0.5) * 12;
+      const z = (Math.random() - 0.5) * 6;
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
       originalY[i] = y;
-      speed[i] = 0.2 + Math.random() * 0.8;
+      speed[i] = 0.15 + Math.random() * 0.35;
     }
 
     const geometry = new THREE.BufferGeometry();
@@ -211,10 +220,10 @@ export const CinematicBackground = () => {
 
     const material = new THREE.PointsMaterial({
       color: 0xff6a3d,
-      size: 0.35,
+      size: 0.18,
       map: squareTexture,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -247,22 +256,18 @@ export const CinematicBackground = () => {
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Gentle floating sine motion for individual particles
       const posAttr = geometry.attributes.position as THREE.BufferAttribute;
       const posArray = posAttr.array as Float32Array;
 
       for (let i = 0; i < particlesCount; i++) {
-        posArray[i * 3 + 1] = originalY[i] + Math.sin(elapsedTime * speed[i] + i) * 0.4;
+        posArray[i * 3 + 1] = originalY[i] + Math.sin(elapsedTime * speed[i] + i) * 0.25;
       }
       posAttr.needsUpdate = true;
 
-      // Slow cluster rotation
-      particleSystem.rotation.y = elapsedTime * 0.02;
-      particleSystem.rotation.x = elapsedTime * 0.01;
+      particleSystem.rotation.y = elapsedTime * 0.01;
 
-      // Parallax interaction with mouse
-      particleSystem.position.x += (mouseX * 1.0 - particleSystem.position.x) * 0.05;
-      particleSystem.position.y += (-mouseY * 1.0 - particleSystem.position.y) * 0.05;
+      particleSystem.position.x += (mouseX * 0.4 - particleSystem.position.x) * 0.03;
+      particleSystem.position.y += (-mouseY * 0.4 - particleSystem.position.y) * 0.03;
 
       renderer.render(scene, camera);
     };
@@ -278,12 +283,21 @@ export const CinematicBackground = () => {
       geometry.dispose();
       material.dispose();
     };
-  }, []);
+  }, [isLight]);
+
+  // Light Mode Background: Extremely calm, professional, static minimal background (0 CPU/GPU overhead)
+  if (isLight) {
+    return (
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#faf9f6] text-[#090909]">
+        <div className="absolute inset-0 bg-radial from-orange-50/40 via-transparent to-transparent opacity-60" />
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       {/* WebGL Shader Layer */}
-      <div className="absolute inset-0 w-full h-full opacity-80 z-[1]">
+      <div className="absolute inset-0 w-full h-full opacity-70 z-[1]">
         <canvas ref={shaderCanvasRef} className="block w-full h-full" />
       </div>
 

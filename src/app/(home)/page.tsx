@@ -30,7 +30,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-transparent text-[#e3e2e2] selection:bg-[#ab2f01] selection:text-[#ffc8b9] overflow-x-hidden">
+    <div className="relative min-h-screen bg-transparent text-[#090909] dark:text-[#e3e2e2] selection:bg-[#ab2f01] selection:text-[#ffc8b9] overflow-x-hidden transition-colors">
       {/* Interactive WebGL & Three.js Background */}
       <CinematicBackground />
 
@@ -39,21 +39,21 @@ export default function LandingPage() {
         <section className="max-w-[1440px] mx-auto px-6 md:px-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[640px] pb-16">
           {/* Hero Left Content */}
           <div className="flex flex-col gap-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#121414]/90 border border-[#FF6A3D]/30 w-fit backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-[#121414]/90 border border-black/10 dark:border-[#FF6A3D]/30 w-fit backdrop-blur-md shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-ping" />
-              <span className="text-xs uppercase tracking-widest font-mono text-[#c4c7c7]">
+              <span className="text-xs uppercase tracking-widest font-mono text-[#525252] dark:text-[#c4c7c7]">
                 Editorial AI Engine 2.0
               </span>
             </div>
 
-            <h1 className="font-['Sora'] text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tighter uppercase text-[#e3e2e2]">
+            <h1 className="font-['Sora'] text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tighter uppercase text-[#090909] dark:text-[#e3e2e2]">
               BUILD. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e3e2e2] via-[#FF6A3D] to-[#ff9d7d]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#090909] dark:from-[#e3e2e2] via-[#FF6A3D] to-[#ff9d7d]">
                 WITHOUT LIMITS.
               </span>
             </h1>
 
-            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
+            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-[#525252] dark:text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
               The elite AI engine for developers and creators who demand precision. Performance-tuned for the next generation of digital excellence.
             </p>
 
