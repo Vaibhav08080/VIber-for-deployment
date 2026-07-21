@@ -11,6 +11,7 @@ import {
   PencilIcon,
   CheckIcon,
   XIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +27,18 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface Props {
     projectId: string;
@@ -35,14 +47,16 @@ interface Props {
 export const ProjectHeader = ({ projectId }: Props) => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
+    const router = useRouter();
     const { theme, setTheme } = useTheme();
     const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
 
     const [isEditing, setIsEditing] = useState(false);
     const [draftName, setDraftName] = useState(project.name);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const { mutate: rename, isPending } = useMutation(
+    const { mutate: rename, isPending: isRenaming } = useMutation(
         trpc.projects.rename.mutationOptions({
             onSuccess: () => {
                 queryClient.invalidateQueries(trpc.projects.getOne.queryOptions({ id: projectId }));
@@ -52,6 +66,15 @@ export const ProjectHeader = ({ projectId }: Props) => {
             onError: () => {
                 setDraftName(project.name);
                 setIsEditing(false);
+            },
+        })
+    );
+
+    const { mutate: deleteProject, isPending: isDeleting } = useMutation(
+        trpc.projects.delete.mutationOptions({
+            onSuccess: () => {
+                queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
+                router.push("/");
             },
         })
     );
@@ -81,6 +104,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
     };
 
     return (
+    <>
     <header className="p-2 flex justify-between items-center border-b">
         {isEditing ? (
             <div className="flex items-center gap-1 pl-2">
@@ -91,7 +115,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     onChange={(e) => setDraftName(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onBlur={handleSubmit}
-                    disabled={isPending}
+                    disabled={isRenaming}
                     className="text-sm font-medium bg-transparent border-b border-primary outline-none w-40 px-1"
                     maxLength={100}
                     autoFocus
@@ -100,7 +124,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     variant="ghost" size="icon"
                     className="size-6"
                     onClick={handleSubmit}
-                    disabled={isPending}
+                    disabled={isRenaming}
                 >
                     <CheckIcon className="size-3 text-green-500"/>
                 </Button>
@@ -108,7 +132,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     variant="ghost" size="icon"
                     className="size-6"
                     onClick={() => { setDraftName(project.name); setIsEditing(false); }}
-                    disabled={isPending}
+                    disabled={isRenaming}
                 >
                     <XIcon className="size-3 text-muted-foreground"/>
                 </Button>
@@ -149,9 +173,40 @@ export const ProjectHeader = ({ projectId }: Props) => {
                             </DropdownMenuSubContent>
                         </DropdownMenuPortal>
                     </DropdownMenuSub>
+                    <DropdownMenuSeparator/>
+                    <DropdownMenuItem
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                    >
+                        <Trash2Icon className="mr-2 h-4 w-4 shrink-0"/>
+                        <span>Delete project</span>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         )}
     </header>
+
+    {/* Confirmation Dialog */}
+    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Delete &quot;{project.name}&quot;?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This will permanently delete this project along with all its messages and generated code. This action cannot be undone.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                    onClick={() => deleteProject({ id: projectId })}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                    {isDeleting ? "Deleting..." : "Delete project"}
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
     );
 }
