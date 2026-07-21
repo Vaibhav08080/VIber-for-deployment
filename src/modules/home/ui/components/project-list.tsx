@@ -24,9 +24,11 @@ export const ProjectList = () => {
       <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {projects?.length === 0 && (    
-          <div className="col-span-full text-center">
-            <p className="text-sm text-muted-foreground">No projects found</p>
+        {projects?.length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-12 gap-3 text-center">
+            <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-2xl">✨</div>
+            <p className="font-medium text-sm">No projects yet</p>
+            <p className="text-xs text-muted-foreground max-w-[200px]">Describe something above and Vibel will build it for you</p>
           </div>
         )}
         {projects?.map((project) => (

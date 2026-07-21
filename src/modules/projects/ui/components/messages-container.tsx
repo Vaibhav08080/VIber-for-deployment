@@ -1,10 +1,8 @@
-
 import { useTRPC } from "@/trpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { MessageCard } from "./message-card";
 import { MessageForm } from "./message-form";
-import { useRef } from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Fragment } from "@prisma/client";
 import { MessageLoading } from "./message-loading";
 interface Props{
@@ -13,8 +11,7 @@ interface Props{
     SetActiveFragment: (fragment: Fragment | null) => void;
 }
 export const MessagesContainer = ({projectId , activeFragment , SetActiveFragment}:Props) => {
-    const BottomRef =useRef<HTMLDivElement>(null)
-    const lastAssistantMessageRef =useRef<string | null>(null)
+    const BottomRef = useRef<HTMLDivElement>(null)
     const trpc = useTRPC()
     const {data:messages} = useSuspenseQuery(trpc.messages.getMany.queryOptions({
         projectId,
@@ -23,12 +20,7 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
     }
 )
     );
-    useEffect(() => {
-        const lastAssistantMessage = messages.findLast((message)=>message.role === "ASSISTANT");
-        if (lastAssistantMessage?.fragment){
-            lastAssistantMessageRef.current = lastAssistantMessage.id;
-        }
-        },[messages , SetActiveFragment]);
+
 
     useEffect(() => {
     // Only auto-select last assistant fragment if nothing is selected
@@ -36,7 +28,6 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
         const lastAssistantMessage = messages.findLast((message) => message.role === "ASSISTANT" && message.fragment);
         if (lastAssistantMessage?.fragment) {
             SetActiveFragment(lastAssistantMessage.fragment);
-            lastAssistantMessageRef.current = lastAssistantMessage.id;
         }
     }
 }, [messages, activeFragment, SetActiveFragment]);
@@ -45,9 +36,9 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
         BottomRef.current?.scrollIntoView()
     },[messages.length])   
     
-    
-    const lastMessage = messages[messages.length - 1];
-    const isLastMessageUser = lastMessage.role === "USER";
+
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const isLastMessageUser = lastMessage?.role === "USER";
 
 
     return(
@@ -81,13 +72,3 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
        
     )
 }
-
-
-
- // ---
-    // [Cascade AI] Why we don't use lastAssistantMessageRef:
-    // The lastAssistantMessageRef was previously used to store the last assistant message's id,
-    // but it was never read or used for any UI effect. In React, to select and highlight the last fragment,
-    // you should update state (via SetActiveFragment) instead of using a ref. This ensures the UI updates as intended.
-    // The effect below correctly auto-selects the last assistant fragment whenever messages change.
-    // ---  [cascade AI] this is the file remember to remove this comment

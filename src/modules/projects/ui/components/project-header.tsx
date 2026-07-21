@@ -56,7 +56,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
                 <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="gap-2">
                         <SunMoonIcon className="size-4 text-muted-foreground"/>
-                        <span>Appearence</span>
+                        <span>Appearance</span>
                     </DropdownMenuSubTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuSubContent>
