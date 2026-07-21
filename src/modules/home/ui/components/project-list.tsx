@@ -73,7 +73,7 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
         onKeyDown={handleKeyDown}
         onBlur={handleSubmit}
         disabled={isPending}
-        className="text-sm font-medium bg-transparent border-b border-[#FF6A3D] outline-none flex-1 min-w-0 px-0.5 text-[#e3e2e2]"
+        className="text-sm font-medium bg-transparent border-b border-[#FF6A3D] outline-none flex-1 min-w-0 px-0.5 text-[#090909] dark:text-[#e3e2e2]"
         maxLength={100}
       />
       <button
@@ -83,9 +83,9 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
           handleSubmit();
         }}
         disabled={isPending}
-        className="shrink-0 p-0.5 rounded hover:bg-[#292a2a]"
+        className="shrink-0 p-0.5 rounded hover:bg-neutral-200 dark:hover:bg-[#292a2a]"
       >
-        <CheckIcon className="size-3 text-emerald-400" />
+        <CheckIcon className="size-3 text-emerald-500" />
       </button>
       <button
         type="button"
@@ -94,9 +94,9 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
           onDone();
         }}
         disabled={isPending}
-        className="shrink-0 p-0.5 rounded hover:bg-[#292a2a]"
+        className="shrink-0 p-0.5 rounded hover:bg-neutral-200 dark:hover:bg-[#292a2a]"
       >
-        <XIcon className="size-3 text-[#8e9192]" />
+        <XIcon className="size-3 text-neutral-400 dark:text-[#8e9192]" />
       </button>
     </div>
   );
@@ -143,20 +143,20 @@ export const ProjectList = () => {
 
   return (
     <>
-      <div className="w-full glass-panel rounded-2xl p-6 md:p-8 border border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#444748]/20 pb-4">
-          <h2 className="text-xl md:text-2xl font-bold font-['Sora'] tracking-tight text-[#e3e2e2]">
+      <div className="w-full glass-panel rounded-2xl p-6 md:p-8 border border-black/10 dark:border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12 bg-white dark:bg-[#121414]/80 shadow-md dark:shadow-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/10 dark:border-[#444748]/20 pb-4">
+          <h2 className="text-xl md:text-2xl font-bold font-['Sora'] tracking-tight text-[#090909] dark:text-[#e3e2e2]">
             {user?.firstName}&apos;s Projects
           </h2>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
+            <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#FF6A3D]/10 dark:bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
               {projects?.length || 0} Saved
             </span>
             {!!projects && projects.length > 0 && (
               <button
                 type="button"
                 onClick={() => setShowDeleteAllDialog(true)}
-                className="text-xs font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-950/50 px-3 py-1 rounded-full border border-rose-900/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="text-xs font-mono text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-900/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Delete all projects"
               >
                 <Trash2Icon className="size-3.5" />
@@ -169,11 +169,11 @@ export const ProjectList = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {projects?.length === 0 && (
             <div className="col-span-full flex flex-col items-center justify-center py-12 gap-3 text-center">
-              <div className="size-14 rounded-2xl bg-[#1e2020] border border-[#444748]/30 flex items-center justify-center text-2xl">
+              <div className="size-14 rounded-2xl bg-neutral-100 dark:bg-[#1e2020] border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center text-2xl">
                 ✨
               </div>
-              <p className="font-medium text-sm text-[#e3e2e2]">No projects yet</p>
-              <p className="text-xs text-[#8e9192] max-w-[220px]">
+              <p className="font-medium text-sm text-[#090909] dark:text-[#e3e2e2]">No projects yet</p>
+              <p className="text-xs text-neutral-500 dark:text-[#8e9192] max-w-[220px]">
                 Describe your application above and Vibel will generate it for you.
               </p>
             </div>
@@ -182,7 +182,7 @@ export const ProjectList = () => {
             <div key={project.id} className="relative group">
               <Button
                 variant="outline"
-                className="font-normal h-auto justify-start w-full text-start p-4 pr-16 bg-[#121414]/80 border-[#444748]/30 hover:border-[#FF6A3D]/50 hover:bg-[#1a1c1c] transition-all rounded-xl"
+                className="font-normal h-auto justify-start w-full text-start p-4 pr-16 bg-neutral-50 dark:bg-[#121414]/80 border-neutral-200 dark:border-[#444748]/30 hover:border-[#FF6A3D]/60 hover:bg-white dark:hover:bg-[#1a1c1c] transition-all rounded-xl shadow-xs"
                 asChild
               >
                 <Link href={`/projects/${project.id}`}>
@@ -192,7 +192,7 @@ export const ProjectList = () => {
                       alt="logo"
                       width={30}
                       height={30}
-                      className="object-contain shrink-0 brightness-125"
+                      className="object-contain shrink-0 brightness-110 dark:brightness-125"
                     />
                     <div className="flex flex-col min-w-0 flex-1">
                       {renamingId === project.id ? (
@@ -202,11 +202,11 @@ export const ProjectList = () => {
                           onDone={() => setRenamingId(null)}
                         />
                       ) : (
-                        <h3 className="truncate font-semibold text-sm text-[#e3e2e2] group-hover:text-[#FF6A3D] transition-colors">
+                        <h3 className="truncate font-semibold text-sm text-[#090909] dark:text-[#e3e2e2] group-hover:text-[#FF6A3D] transition-colors">
                           {project.name}
                         </h3>
                       )}
-                      <p className="text-xs text-[#8e9192] font-mono mt-0.5">
+                      <p className="text-xs text-neutral-500 dark:text-[#8e9192] font-mono mt-0.5">
                         {formatDistanceToNow(project.updatedAt, { addSuffix: true })}
                       </p>
                     </div>
@@ -220,7 +220,7 @@ export const ProjectList = () => {
                   <button
                     type="button"
                     title="Rename project"
-                    className="p-1.5 rounded-md hover:bg-[#292a2a] text-[#8e9192] hover:text-[#e3e2e2] transition-colors"
+                    className="p-1.5 rounded-md hover:bg-neutral-200 dark:hover:bg-[#292a2a] text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] transition-colors"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -232,7 +232,7 @@ export const ProjectList = () => {
                   <button
                     type="button"
                     title="Delete project"
-                    className="p-1.5 rounded-md hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 transition-colors"
+                    className="p-1.5 rounded-md hover:bg-rose-100 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 transition-colors"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -255,15 +255,15 @@ export const ProjectList = () => {
           if (!open) setDeletingProject(null);
         }}
       >
-        <AlertDialogContent className="bg-[#121414] border-[#444748]/50 text-[#e3e2e2]">
+        <AlertDialogContent className="bg-white dark:bg-[#121414] border-neutral-200 dark:border-[#444748]/50 text-[#090909] dark:text-[#e3e2e2]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-['Sora']">Delete &quot;{deletingProject?.name}&quot;?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#8e9192]">
+            <AlertDialogDescription className="text-neutral-600 dark:text-[#8e9192]">
               This will permanently delete this project along with all its messages and generated code. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting} className="border-[#444748]/50 text-[#e3e2e2] hover:bg-[#292a2a]">
+            <AlertDialogCancel disabled={isDeleting} className="border-neutral-200 dark:border-[#444748]/50 text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a]">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -284,17 +284,17 @@ export const ProjectList = () => {
           if (!open) setShowDeleteAllDialog(false);
         }}
       >
-        <AlertDialogContent className="bg-[#121414] border-rose-900/40 text-[#e3e2e2]">
+        <AlertDialogContent className="bg-white dark:bg-[#121414] border-rose-200 dark:border-rose-900/40 text-[#090909] dark:text-[#e3e2e2]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-['Sora'] text-rose-400">
+            <AlertDialogTitle className="font-['Sora'] text-rose-600 dark:text-rose-400">
               Delete All {projects?.length} Projects?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#8e9192]">
-              This will permanently delete all <strong className="text-[#e3e2e2]">{projects?.length}</strong> of your projects, including all generated code, messages, and history. This action CANNOT be undone.
+            <AlertDialogDescription className="text-neutral-600 dark:text-[#8e9192]">
+              This will permanently delete all <strong className="text-[#090909] dark:text-[#e3e2e2]">{projects?.length}</strong> of your projects, including all generated code, messages, and history. This action CANNOT be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingAll} className="border-[#444748]/50 text-[#e3e2e2] hover:bg-[#292a2a]">
+            <AlertDialogCancel disabled={isDeletingAll} className="border-neutral-200 dark:border-[#444748]/50 text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a]">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

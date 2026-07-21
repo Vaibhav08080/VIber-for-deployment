@@ -94,13 +94,13 @@ export const ProjectForm = () => {
         {/* Glassmorphic Prompt Input Container */}
         <div
           className={cn(
-            "glass-panel p-2 md:p-3 rounded-2xl border border-[#444748]/30 shadow-2xl transition-all duration-300",
-            isFocused && "border-[#FF6A3D]/50 shadow-[0_0_30px_rgba(255,106,61,0.15)]"
+            "glass-panel p-2 md:p-3 rounded-2xl border border-black/10 dark:border-[#444748]/30 shadow-xl transition-all duration-300 bg-white dark:bg-[#121414]/80",
+            isFocused && "border-[#FF6A3D]/60 ring-2 ring-[#FF6A3D]/20 shadow-2xl"
           )}
         >
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col md:flex-row items-center gap-3">
             <div className="flex-1 w-full px-4 py-2 flex items-start gap-3">
-              <span className="material-symbols-outlined text-[#8e9192] mt-3">auto_awesome</span>
+              <span className="material-symbols-outlined text-neutral-400 dark:text-[#8e9192] mt-3">auto_awesome</span>
               <FormField
                 control={form.control}
                 name="value"
@@ -112,7 +112,7 @@ export const ProjectForm = () => {
                     onBlur={() => setIsFocused(false)}
                     minRows={2}
                     maxRows={6}
-                    className="pt-2 resize-none border-none w-full outline-none bg-transparent text-[#e3e2e2] placeholder:text-[#8e9192] font-['Geist'] text-base md:text-lg focus:ring-0"
+                    className="pt-2 resize-none border-none w-full outline-none bg-transparent text-[#090909] dark:text-[#e3e2e2] placeholder:text-neutral-400 dark:placeholder:text-[#8e9192] font-['Geist'] text-base md:text-lg focus:ring-0"
                     placeholder="What should we build today? Describe your website or app..."
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
@@ -126,7 +126,7 @@ export const ProjectForm = () => {
             </div>
 
             {/* Action Buttons Toolbar */}
-            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 p-2 w-full md:w-auto border-t md:border-t-0 md:border-l border-[#444748]/30">
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 p-2 w-full md:w-auto border-t md:border-t-0 md:border-l border-black/10 dark:border-[#444748]/30">
               <div className="flex items-center gap-1">
                 {/* Voice Input */}
                 <SpeechRecognitionButton
@@ -147,12 +147,12 @@ export const ProjectForm = () => {
                   onClick={handleEnhance}
                   title="Enhance prompt with AI"
                   className={cn(
-                    "p-2.5 rounded-lg hover:bg-[#292a2a] transition-colors text-[#8e9192] hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono",
-                    isEnhancing && "text-purple-400 animate-pulse"
+                    "p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-colors text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono cursor-pointer",
+                    isEnhancing && "text-purple-500 animate-pulse"
                   )}
                 >
                   {isEnhancing ? (
-                    <Loader2Icon className="size-4 animate-spin text-purple-400" />
+                    <Loader2Icon className="size-4 animate-spin text-purple-500" />
                   ) : (
                     <SparklesIcon className="size-4 text-[#FF6A3D]" />
                   )}
@@ -165,7 +165,7 @@ export const ProjectForm = () => {
                 type="submit"
                 disabled={isButtonDisabled}
                 className={cn(
-                  "bg-[#FF6A3D] text-[#3b0a00] px-7 py-3 rounded-xl font-['Geist'] text-xs uppercase tracking-widest font-extrabold hover:bg-[#ff8a6d] active:scale-95 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,106,61,0.3)] cursor-pointer",
+                  "bg-[#FF6A3D] text-white dark:text-[#3b0a00] px-7 py-3 rounded-xl font-['Geist'] text-xs uppercase tracking-widest font-extrabold hover:bg-[#ff8a6d] active:scale-95 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,106,61,0.3)] cursor-pointer",
                   isButtonDisabled && "opacity-50 cursor-not-allowed hover:bg-[#FF6A3D] active:scale-100 shadow-none"
                 )}
               >
@@ -185,8 +185,8 @@ export const ProjectForm = () => {
           </form>
 
           {/* Shortcut hint */}
-          <div className="px-4 pb-2 text-[11px] text-[#8e9192] font-mono flex items-center justify-end gap-1">
-            <kbd className="inline-flex h-4 items-center gap-0.5 rounded border border-[#444748]/50 bg-[#1a1c1c] px-1 text-[10px] text-[#c4c7c7]">
+          <div className="px-4 pb-2 text-[11px] text-neutral-400 dark:text-[#8e9192] font-mono flex items-center justify-end gap-1">
+            <kbd className="inline-flex h-4 items-center gap-0.5 rounded border border-neutral-200 dark:border-[#444748]/50 bg-neutral-100 dark:bg-[#1a1c1c] px-1 text-[10px] text-neutral-600 dark:text-[#c4c7c7]">
               <span>⌘</span>Enter
             </kbd>
             <span>to submit</span>
@@ -199,7 +199,7 @@ export const ProjectForm = () => {
             <button
               key={template.title}
               type="button"
-              className="bg-[#121414]/80 border border-[#444748]/40 hover:border-[#FF6A3D]/60 text-[#c4c7c7] hover:text-[#e3e2e2] px-4 py-2 rounded-full text-xs font-['Geist'] transition-all backdrop-blur-md flex items-center gap-1.5"
+              className="bg-white dark:bg-[#121414]/80 border border-neutral-200/90 dark:border-[#444748]/40 hover:border-[#FF6A3D]/60 text-neutral-800 dark:text-[#c4c7c7] hover:text-[#090909] dark:hover:text-[#e3e2e2] px-4 py-2 rounded-full text-xs font-['Geist'] transition-all backdrop-blur-md flex items-center gap-1.5 shadow-xs hover:shadow-sm cursor-pointer"
               onClick={() => onSelect(template.prompt)}
             >
               <span>{template.emoji}</span>

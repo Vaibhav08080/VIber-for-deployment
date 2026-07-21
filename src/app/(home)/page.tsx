@@ -1,21 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { CinematicBackground } from "@/components/cinematic-background";
-import { Navbar } from "@/modules/home/ui/components/navbar";
 import { ProjectForm } from "@/modules/home/ui/components/project-form";
 import { ProjectList } from "@/modules/home/ui/components/project-list";
+import { CinematicBackground } from "@/components/cinematic-background";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
-export default function LandingPage() {
+export default function Home() {
   const [parallax, setParallax] = useState({ rotateX: 0, rotateY: 0 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      const xAxis = (window.innerWidth / 2 - e.clientX) / 40;
-      const yAxis = (window.innerHeight / 2 - e.clientY) / 40;
-      setParallax({ rotateX: yAxis, rotateY: xAxis });
+      const { innerWidth, innerHeight } = window;
+      const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
+      const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
+      setParallax({
+        rotateX: -y * 8,
+        rotateY: x * 8,
+      });
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -23,10 +26,7 @@ export default function LandingPage() {
   }, []);
 
   const scrollToPrompt = () => {
-    const promptElem = document.getElementById("prompt-builder");
-    if (promptElem) {
-      promptElem.scrollIntoView({ behavior: "smooth" });
-    }
+    document.getElementById("prompt-builder")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -39,9 +39,9 @@ export default function LandingPage() {
         <section className="max-w-[1440px] mx-auto px-6 md:px-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[640px] pb-16">
           {/* Hero Left Content */}
           <div className="flex flex-col gap-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-[#121414]/90 border border-black/10 dark:border-[#FF6A3D]/30 w-fit backdrop-blur-md shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-[#121414]/90 border border-neutral-200 dark:border-[#FF6A3D]/30 w-fit backdrop-blur-md shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-ping" />
-              <span className="text-xs uppercase tracking-widest font-mono text-[#525252] dark:text-[#c4c7c7]">
+              <span className="text-xs uppercase tracking-widest font-mono text-neutral-700 dark:text-[#c4c7c7] font-semibold">
                 Editorial AI Engine 2.0
               </span>
             </div>
@@ -53,14 +53,14 @@ export default function LandingPage() {
               </span>
             </h1>
 
-            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-[#525252] dark:text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
+            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-neutral-600 dark:text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
               The elite AI engine for developers and creators who demand precision. Performance-tuned for the next generation of digital excellence.
             </p>
 
             <div className="flex items-center gap-4 mt-2">
               <button
                 onClick={scrollToPrompt}
-                className="bg-[#FF6A3D] text-[#3b0a00] px-8 py-4 rounded-xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,106,61,0.3)] flex items-center gap-2 cursor-pointer group"
+                className="bg-[#FF6A3D] text-white dark:text-[#3b0a00] px-8 py-4 rounded-xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,106,61,0.3)] flex items-center gap-2 cursor-pointer group"
               >
                 <span>Start Building</span>
                 <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">
@@ -78,39 +78,39 @@ export default function LandingPage() {
             }}
           >
             {/* Glass Browser Wireframe */}
-            <div className="absolute top-0 right-0 w-[420px] h-[280px] bg-[#121414]/80 rounded-2xl border border-[#444748]/40 shadow-2xl overflow-hidden glass-panel backdrop-blur-xl">
-              <div className="flex items-center gap-2 p-3 border-b border-[#444748]/30 bg-[#0d0e0f]/50">
+            <div className="absolute top-0 right-0 w-[420px] h-[280px] bg-white/90 dark:bg-[#121414]/80 rounded-2xl border border-neutral-200 dark:border-[#444748]/40 shadow-xl dark:shadow-2xl overflow-hidden glass-panel backdrop-blur-xl">
+              <div className="flex items-center gap-2 p-3 border-b border-neutral-200 dark:border-[#444748]/30 bg-neutral-50 dark:bg-[#0d0e0f]/50">
                 <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <div className="mx-auto bg-[#292a2a] px-4 py-0.5 rounded text-[10px] font-mono text-[#8e9192]">
+                <div className="mx-auto bg-neutral-200 dark:bg-[#292a2a] px-4 py-0.5 rounded text-[10px] font-mono text-neutral-600 dark:text-[#8e9192]">
                   vibel.app/preview/active
                 </div>
               </div>
               <div className="p-6 space-y-4">
                 <div className="h-4 bg-[#FF6A3D]/20 rounded w-3/4 animate-pulse" />
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="h-24 bg-[#292a2a]/40 rounded-xl border border-[#444748]/20 flex flex-col justify-end p-3">
+                  <div className="h-24 bg-neutral-100 dark:bg-[#292a2a]/40 rounded-xl border border-neutral-200 dark:border-[#444748]/20 flex flex-col justify-end p-3">
                     <div className="h-2 bg-[#FF6A3D]/40 rounded w-1/2 mb-1" />
-                    <div className="h-2 bg-[#444748]/40 rounded w-3/4" />
+                    <div className="h-2 bg-neutral-300 dark:bg-[#444748]/40 rounded w-3/4" />
                   </div>
-                  <div className="h-24 bg-[#292a2a]/40 rounded-xl border border-[#444748]/20 flex flex-col justify-end p-3">
+                  <div className="h-24 bg-neutral-100 dark:bg-[#292a2a]/40 rounded-xl border border-neutral-200 dark:border-[#444748]/20 flex flex-col justify-end p-3">
                     <div className="h-2 bg-[#FF6A3D]/40 rounded w-2/3 mb-1" />
-                    <div className="h-2 bg-[#444748]/40 rounded w-1/2" />
+                    <div className="h-2 bg-neutral-300 dark:bg-[#444748]/40 rounded w-1/2" />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Code Snippet Overlay */}
-            <div className="absolute bottom-12 left-4 w-[290px] p-4 glass-panel rounded-xl border border-[#444748]/50 font-mono text-xs shadow-2xl backdrop-blur-xl bg-[#0d0e0f]/85">
-              <div className="flex justify-between items-center mb-3 border-b border-[#444748]/30 pb-2">
+            {/* Code Snippet Overlay (Crisp Dark Slate Box for high-end look) */}
+            <div className="absolute bottom-12 left-4 w-[290px] p-4 rounded-xl border border-slate-700/80 font-mono text-xs shadow-2xl backdrop-blur-xl bg-[#0f172a] text-slate-100">
+              <div className="flex justify-between items-center mb-3 border-b border-slate-700/60 pb-2">
                 <span className="text-[#FF6A3D] font-semibold text-xs">vibel.config.js</span>
-                <span className="material-symbols-outlined text-[#8e9192] text-sm">terminal</span>
+                <span className="material-symbols-outlined text-slate-400 text-sm">terminal</span>
               </div>
-              <pre className="text-[#c4c7c7] text-[11px] leading-relaxed">
+              <pre className="text-slate-300 text-[11px] leading-relaxed">
                 <span className="text-[#FF6A3D]">export default</span> &#123;<br />
                 &nbsp;&nbsp;engine: <span className="text-amber-300">&apos;vibel-ultra&apos;</span>,<br />
                 &nbsp;&nbsp;precision: <span className="text-emerald-400">0.98</span>,<br />
@@ -120,12 +120,12 @@ export default function LandingPage() {
             </div>
 
             {/* Mini Terminal Overlay */}
-            <div className="absolute bottom-0 right-8 w-[330px] bg-[#090909]/95 p-4 rounded-xl border border-[#FF6A3D]/30 font-mono text-xs text-emerald-400/90 shadow-2xl">
+            <div className="absolute bottom-0 right-8 w-[330px] bg-[#090d16] p-4 rounded-xl border border-emerald-900/60 font-mono text-xs text-emerald-400 shadow-2xl">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[#8e9192]">$</span>
-                <span className="text-[#e3e2e2]">vibel deploy --live</span>
+                <span className="text-slate-400">$</span>
+                <span className="text-white">vibel deploy --live</span>
               </div>
-              <div className="text-[#8e9192] text-[11px] space-y-1">
+              <div className="text-slate-400 text-[11px] space-y-1">
                 <div>&gt; Optimizing cinematic assets...</div>
                 <div>&gt; Syncing WebGL shader state...</div>
                 <div className="text-[#FF6A3D] font-semibold pt-1">
@@ -149,7 +149,7 @@ export default function LandingPage() {
             <span className="text-xs uppercase font-mono tracking-[0.3em] text-[#FF6A3D]">
               Prompt Interface
             </span>
-            <h2 className="font-['Sora'] text-2xl sm:text-3xl font-bold tracking-tight text-[#e3e2e2] mt-2">
+            <h2 className="font-['Sora'] text-2xl sm:text-3xl font-bold tracking-tight text-[#090909] dark:text-[#e3e2e2] mt-2">
               Describe Your Vision in Natural Language
             </h2>
           </div>
@@ -162,23 +162,23 @@ export default function LandingPage() {
         </section>
 
         {/* 4. Trust & Social Proof Marquee */}
-        <section className="w-full overflow-hidden border-y border-[#444748]/20 py-12 bg-[#0d0e0f]/50 backdrop-blur-sm my-16">
+        <section className="w-full overflow-hidden border-y border-neutral-200 dark:border-[#444748]/20 py-12 bg-neutral-100/80 dark:bg-[#0d0e0f]/50 backdrop-blur-sm my-16">
           <div className="flex animate-scroll whitespace-nowrap items-center gap-24">
-            <div className="flex items-center gap-24 grayscale opacity-40 hover:opacity-100 transition-opacity">
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">LINEAR</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">INNGEST</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">APPLE</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">VERCEL</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">STRIPE</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">FRAMER</span>
+            <div className="flex items-center gap-24 grayscale opacity-50 dark:opacity-40 hover:opacity-100 transition-opacity">
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">LINEAR</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">INNGEST</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">APPLE</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">VERCEL</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">STRIPE</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">FRAMER</span>
             </div>
-            <div className="flex items-center gap-24 grayscale opacity-40 hover:opacity-100 transition-opacity">
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">LINEAR</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">INNGEST</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">APPLE</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">VERCEL</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">STRIPE</span>
-              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#e3e2e2]">FRAMER</span>
+            <div className="flex items-center gap-24 grayscale opacity-50 dark:opacity-40 hover:opacity-100 transition-opacity">
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">LINEAR</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">INNGEST</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">APPLE</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">VERCEL</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">STRIPE</span>
+              <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">FRAMER</span>
             </div>
           </div>
         </section>
@@ -191,31 +191,31 @@ export default function LandingPage() {
               <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
                 Architecture
               </span>
-              <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#e3e2e2] uppercase">
+              <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#090909] dark:text-[#e3e2e2] uppercase">
                 AI Design <br />
                 Engine.
               </h2>
-              <p className="font-['Geist'] text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
+              <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
                 Vibel doesn&apos;t just write code; it architecturally understands intent. Using our proprietary Cinematic LLM, we generate high-fidelity layouts that respect your design system&apos;s soul.
               </p>
               <div className="pt-2">
-                <button className="border border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#e3e2e2] hover:bg-[#292a2a] transition-all cursor-pointer">
+                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
                   Documentation
                 </button>
               </div>
             </div>
 
-            <div className="relative aspect-video glass-panel rounded-2xl border border-[#444748]/30 flex items-center justify-center p-8 overflow-hidden group shadow-2xl">
+            <div className="relative aspect-video glass-panel rounded-2xl border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center p-8 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
               <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6A3D]/10 to-transparent" />
-              <div className="w-full h-full border border-[#444748]/20 rounded-xl bg-[#0d0e0f]/80 p-4 space-y-3 relative z-10">
+              <div className="w-full h-full border border-neutral-200 dark:border-[#444748]/20 rounded-xl bg-neutral-50 dark:bg-[#0d0e0f]/80 p-4 space-y-3 relative z-10">
                 <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#444748]/50" />
-                  <div className="w-3 h-3 rounded-full bg-[#444748]/50" />
+                  <div className="w-3 h-3 rounded-full bg-neutral-300 dark:bg-[#444748]/50" />
+                  <div className="w-3 h-3 rounded-full bg-neutral-300 dark:bg-[#444748]/50" />
                 </div>
-                <div className="h-full border-t border-[#444748]/20 grid grid-cols-6 grid-rows-6 gap-2 pt-3">
-                  <div className="col-span-2 row-span-4 border border-[#444748]/30 bg-[#292a2a]/30 rounded-lg group-hover:bg-[#FF6A3D]/20 transition-colors" />
-                  <div className="col-span-4 row-span-2 border border-[#444748]/30 bg-[#292a2a]/30 rounded-lg" />
-                  <div className="col-span-4 row-span-4 border border-[#444748]/30 bg-[#292a2a]/30 rounded-lg" />
+                <div className="h-full border-t border-neutral-200 dark:border-[#444748]/20 grid grid-cols-6 grid-rows-6 gap-2 pt-3">
+                  <div className="col-span-2 row-span-4 border border-neutral-200 dark:border-[#444748]/30 bg-neutral-200/60 dark:bg-[#292a2a]/30 rounded-lg group-hover:bg-[#FF6A3D]/20 transition-colors" />
+                  <div className="col-span-4 row-span-2 border border-neutral-200 dark:border-[#444748]/30 bg-neutral-200/60 dark:bg-[#292a2a]/30 rounded-lg" />
+                  <div className="col-span-4 row-span-4 border border-neutral-200 dark:border-[#444748]/30 bg-neutral-200/60 dark:bg-[#292a2a]/30 rounded-lg" />
                 </div>
               </div>
             </div>
@@ -223,19 +223,19 @@ export default function LandingPage() {
 
           {/* Feature Block 2: Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1 relative aspect-square glass-panel rounded-2xl border border-[#444748]/30 flex items-center justify-center p-12 overflow-hidden group shadow-2xl">
+            <div className="order-2 lg:order-1 relative aspect-square glass-panel rounded-2xl border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center p-12 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
               <div className="absolute inset-0 bg-gradient-to-bl from-[#FF6A3D]/10 to-transparent" />
               <div className="w-full flex flex-col items-center gap-6 relative z-10">
-                <div className="w-24 h-24 border border-[#FF6A3D]/40 rounded-full flex items-center justify-center animate-pulse bg-[#ab2f01]/10">
+                <div className="w-24 h-24 border border-[#FF6A3D]/40 rounded-full flex items-center justify-center animate-pulse bg-[#FF6A3D]/10">
                   <span className="material-symbols-outlined text-4xl text-[#FF6A3D]">
                     database
                   </span>
                 </div>
                 <div className="space-y-3 w-full text-center max-w-xs">
-                  <div className="h-1.5 bg-[#292a2a] w-full rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-neutral-200 dark:bg-[#292a2a] w-full rounded-full overflow-hidden">
                     <div className="h-full bg-[#FF6A3D] w-1/3 animate-pulse" />
                   </div>
-                  <span className="font-mono text-xs text-[#8e9192]">
+                  <span className="font-mono text-xs text-neutral-500 dark:text-[#8e9192]">
                     Synchronizing data nodes across 35 edges...
                   </span>
                 </div>
@@ -246,15 +246,15 @@ export default function LandingPage() {
               <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
                 Performance
               </span>
-              <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#e3e2e2] uppercase">
+              <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#090909] dark:text-[#e3e2e2] uppercase">
                 Global <br />
                 Deployment.
               </h2>
-              <p className="font-['Geist'] text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
+              <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
                 Deploy your Vibel-generated apps instantly to the edge. Our native integration with Vercel and AWS ensures sub-100ms response times globally.
               </p>
               <div className="pt-2">
-                <button className="border border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#e3e2e2] hover:bg-[#292a2a] transition-all cursor-pointer">
+                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
                   View Infrastructure
                 </button>
               </div>
@@ -263,129 +263,100 @@ export default function LandingPage() {
         </section>
 
         {/* 6. Showcase Gallery */}
-        <section id="showcase" className="max-w-[1440px] mx-auto px-6 md:px-20 py-24">
-          <div className="mb-16 text-center space-y-3">
-            <span className="text-xs uppercase font-mono tracking-[0.3em] text-[#FF6A3D]">
+        <section id="showcase" className="max-w-[1440px] mx-auto px-6 md:px-20 py-20 scroll-mt-32">
+          <div className="text-center max-w-xl mx-auto space-y-4 mb-16">
+            <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
               Gallery
             </span>
-            <h3 className="font-['Sora'] text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight uppercase text-[#e3e2e2]">
-              Created with Vibel
-            </h3>
-            <p className="font-['Geist'] text-[#8e9192] text-base">
+            <h2 className="font-['Sora'] text-4xl font-extrabold text-[#090909] dark:text-[#e3e2e2] tracking-tight uppercase">
+              Created With Vibel
+            </h2>
+            <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base">
               The finest digital products, generated in seconds.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Project Card 1 */}
-            <div className="group relative aspect-[16/10] bg-[#1a1c1c] border border-[#444748]/30 rounded-2xl overflow-hidden hover:border-[#FF6A3D]/50 transition-all duration-500 shadow-2xl">
-              <Image
-                src="/showcase/aurora.jpg"
-                alt="Aurora Capital Showcase"
-                fill
-                className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-[#090909]/40 to-transparent flex flex-col justify-end p-8">
-                <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest mb-1 font-semibold">
+            {/* Showcase Card 1 */}
+            <div className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01]">
+              <div className="aspect-video relative overflow-hidden">
+                <Image
+                  src="/showcase/aurora.jpg"
+                  alt="Aurora Capital"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+              </div>
+              <div className="p-8 absolute bottom-0 left-0 right-0 text-white">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF6A3D] bg-[#FF6A3D]/10 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
                   Fintech
                 </span>
-                <h4 className="font-['Sora'] text-2xl font-bold text-[#e3e2e2] tracking-tight">
+                <h3 className="font-['Sora'] text-2xl font-bold mt-3 group-hover:text-[#FF6A3D] transition-colors">
                   AURORA CAPITAL
-                </h4>
+                </h3>
               </div>
             </div>
 
-            {/* Project Card 2 */}
-            <div className="group relative aspect-[16/10] bg-[#1a1c1c] border border-[#444748]/30 rounded-2xl overflow-hidden hover:border-[#FF6A3D]/50 transition-all duration-500 shadow-2xl">
-              <Image
-                src="/showcase/tempora.jpg"
-                alt="Tempora Watches Showcase"
-                fill
-                className="object-cover opacity-70 group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-[#090909]/40 to-transparent flex flex-col justify-end p-8">
-                <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest mb-1 font-semibold">
+            {/* Showcase Card 2 */}
+            <div className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01]">
+              <div className="aspect-video relative overflow-hidden">
+                <Image
+                  src="/showcase/tempora.jpg"
+                  alt="Tempora Watches"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+              </div>
+              <div className="p-8 absolute bottom-0 left-0 right-0 text-white">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF6A3D] bg-[#FF6A3D]/10 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
                   Retail
                 </span>
-                <h4 className="font-['Sora'] text-2xl font-bold text-[#e3e2e2] tracking-tight">
+                <h3 className="font-['Sora'] text-2xl font-bold mt-3 group-hover:text-[#FF6A3D] transition-colors">
                   TEMPORA WATCHES
-                </h4>
+                </h3>
               </div>
             </div>
           </div>
         </section>
 
-        {/* 7. Final Call to Action */}
-        <section className="max-w-[1440px] mx-auto px-6 md:px-20 py-20 mb-12 text-center">
-          <div className="glass-panel py-20 px-8 rounded-3xl border border-[#444748]/30 relative overflow-hidden shadow-2xl">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-[#FF6A3D] to-transparent opacity-40" />
-
-            <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
-              <h2 className="font-['Sora'] text-4xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tighter leading-tight text-[#e3e2e2]">
+        {/* 7. Call To Action Footer Banner */}
+        <section className="max-w-[1440px] mx-auto px-6 md:px-20 py-24">
+          <div className="relative rounded-3xl p-12 md:p-20 text-center overflow-hidden border border-neutral-800 bg-[#090909] text-white shadow-2xl">
+            <div className="absolute inset-0 bg-radial from-[#FF6A3D]/20 via-transparent to-transparent opacity-60 pointer-events-none" />
+            <div className="relative z-10 max-w-2xl mx-auto space-y-8">
+              <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold uppercase tracking-tight text-white leading-tight">
                 Ready to build <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e3e2e2] to-[#FF6A3D]">
-                  the future?
-                </span>
+                <span className="text-[#FF6A3D]">without boundaries?</span>
               </h2>
-              <p className="font-['Geist'] text-[#c4c7c7] text-base sm:text-lg">
-                Join the 10,000+ elite developers building the cinematic web with Vibel.
+              <p className="font-['Geist'] text-neutral-400 text-lg">
+                Join thousands of developers creating the future of the web with Vibel AI.
               </p>
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+              <div className="pt-4 flex justify-center">
                 <button
                   onClick={scrollToPrompt}
-                  className="w-full sm:w-auto bg-[#FF6A3D] text-[#3b0a00] px-10 py-4 rounded-full font-['Geist'] text-xs uppercase tracking-widest font-extrabold hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,106,61,0.3)] cursor-pointer"
+                  className="bg-[#FF6A3D] text-[#3b0a00] px-10 py-5 rounded-2xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_35px_rgba(255,106,61,0.4)] flex items-center gap-3 cursor-pointer"
                 >
-                  CREATE ACCOUNT
-                </button>
-                <button className="w-full sm:w-auto border border-[#444748]/50 px-10 py-4 rounded-full font-['Geist'] text-xs uppercase tracking-widest font-semibold text-[#e3e2e2] hover:bg-[#292a2a] transition-colors cursor-pointer">
-                  TALK TO SALES
+                  <span>Launch Editor</span>
+                  <span className="material-symbols-outlined text-lg">rocket_launch</span>
                 </button>
               </div>
             </div>
-
-            {/* Glowing blur decorations */}
-            <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-[#FF6A3D]/10 rounded-full blur-[100px] pointer-events-none" />
-            <div className="absolute -top-20 -left-20 w-80 h-80 bg-[#FF6A3D]/10 rounded-full blur-[100px] pointer-events-none" />
           </div>
         </section>
-      </main>
 
-      {/* 8. Footer Shell */}
-      <footer className="w-full py-16 bg-[#090909] border-t border-[#444748]/20 relative z-10">
-        <div className="max-w-[1440px] mx-auto px-6 md:px-20 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col gap-3 items-center md:items-start">
-            <div className="flex items-center gap-2.5">
-              <Image src="/logo.svg" alt="Vibel Logo" width={26} height={26} className="brightness-125" />
-              <span className="font-['Sora'] text-2xl font-bold text-[#e3e2e2]">Vibel</span>
+        {/* 8. Footer */}
+        <footer className="border-t border-neutral-200 dark:border-[#444748]/30 py-12 text-center text-xs font-mono text-neutral-500 dark:text-[#8e9192]">
+          <div className="max-w-[1440px] mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Image src="/logo.svg" alt="Vibel Logo" width={20} height={20} className="brightness-110 dark:brightness-125" />
+              <span className="font-['Sora'] font-bold text-neutral-900 dark:text-[#e3e2e2]">Vibel AI Engine</span>
             </div>
-            <p className="font-['Geist'] text-xs text-[#8e9192] max-w-[280px] text-center md:text-left">
-              Built for the cinematic web. The elite AI engine for precision creators.
-            </p>
+            <div>© {new Date().getFullYear()} Vibel Inc. All rights reserved.</div>
           </div>
-
-          <div className="flex flex-wrap justify-center gap-8 items-center text-xs font-['Geist']">
-            <Link href="#platform" className="text-[#8e9192] hover:text-[#FF6A3D] transition-colors">
-              Documentation
-            </Link>
-            <Link href="#templates" className="text-[#8e9192] hover:text-[#FF6A3D] transition-colors">
-              Changelog
-            </Link>
-            <Link href="/pricing" className="text-[#8e9192] hover:text-[#FF6A3D] transition-colors">
-              Pricing
-            </Link>
-            <Link href="#" className="text-[#8e9192] hover:text-[#FF6A3D] transition-colors">
-              Terms
-            </Link>
-            <Link href="#" className="text-[#8e9192] hover:text-[#FF6A3D] transition-colors">
-              Privacy
-            </Link>
-          </div>
-
-          <div className="font-['Geist'] text-xs text-[#8e9192]">
-            © {new Date().getFullYear()} Vibel AI. Built for the cinematic web.
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </main>
     </div>
   );
 }
