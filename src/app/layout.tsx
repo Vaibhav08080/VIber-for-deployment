@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -52,11 +52,15 @@ export const metadata: Metadata = {
     images: ["/logo.svg"],
     creator: "@yourtwitterhandle"
   },
-  themeColor: "#C96342",
   alternates: {
     canonical: "https://vibel.app/"
   }
 };
+
+export const viewport: Viewport = {
+  themeColor: "#C96342",
+};
+
 
 export default function RootLayout({
   children,
