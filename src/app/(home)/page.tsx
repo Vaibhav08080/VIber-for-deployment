@@ -30,7 +30,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#090909] text-[#e3e2e2] selection:bg-[#ab2f01] selection:text-[#ffc8b9] overflow-x-hidden">
+    <div className="relative min-h-screen bg-transparent text-[#e3e2e2] selection:bg-[#ab2f01] selection:text-[#ffc8b9] overflow-x-hidden">
       {/* Interactive WebGL & Three.js Background */}
       <CinematicBackground />
 

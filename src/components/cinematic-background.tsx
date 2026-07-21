@@ -71,11 +71,11 @@ export const CinematicBackground = () => {
         
         // Mouse-following radial spotlight with orange glow
         float dist = distance(uv, mouse);
-        float spotlight = smoothstep(0.65, 0.0, dist) * 0.08;
+        float spotlight = smoothstep(0.65, 0.0, dist) * 0.12;
         color += vec3(1.0, 0.41, 0.24) * spotlight;
         
-        // Center ambient spotlight behind hero
-        float ambientSpot = smoothstep(0.85, 0.0, distance(uv, vec2(0.5, 0.6))) * 0.04;
+        // Center ambient spotlight behind hero text
+        float ambientSpot = smoothstep(0.85, 0.0, distance(uv, vec2(0.5, 0.6))) * 0.06;
         color += vec3(1.0, 0.41, 0.24) * ambientSpot;
 
         // Fine paper film grain noise
@@ -190,15 +190,15 @@ export const CinematicBackground = () => {
 
     const squareTexture = createSquareTexture();
 
-    const particlesCount = 280;
+    const particlesCount = 350;
     const positions = new Float32Array(particlesCount * 3);
     const originalY = new Float32Array(particlesCount);
     const speed = new Float32Array(particlesCount);
 
     for (let i = 0; i < particlesCount; i++) {
-      const x = (Math.random() - 0.5) * 22;
-      const y = (Math.random() - 0.5) * 16;
-      const z = (Math.random() - 0.5) * 10;
+      const x = (Math.random() - 0.5) * 26;
+      const y = (Math.random() - 0.5) * 18;
+      const z = (Math.random() - 0.5) * 12;
       positions[i * 3] = x;
       positions[i * 3 + 1] = y;
       positions[i * 3 + 2] = z;
@@ -211,10 +211,10 @@ export const CinematicBackground = () => {
 
     const material = new THREE.PointsMaterial({
       color: 0xff6a3d,
-      size: 0.22,
+      size: 0.35,
       map: squareTexture,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.85,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -252,7 +252,7 @@ export const CinematicBackground = () => {
       const posArray = posAttr.array as Float32Array;
 
       for (let i = 0; i < particlesCount; i++) {
-        posArray[i * 3 + 1] = originalY[i] + Math.sin(elapsedTime * speed[i] + i) * 0.3;
+        posArray[i * 3 + 1] = originalY[i] + Math.sin(elapsedTime * speed[i] + i) * 0.4;
       }
       posAttr.needsUpdate = true;
 
@@ -261,8 +261,8 @@ export const CinematicBackground = () => {
       particleSystem.rotation.x = elapsedTime * 0.01;
 
       // Parallax interaction with mouse
-      particleSystem.position.x += (mouseX * 0.8 - particleSystem.position.x) * 0.05;
-      particleSystem.position.y += (-mouseY * 0.8 - particleSystem.position.y) * 0.05;
+      particleSystem.position.x += (mouseX * 1.0 - particleSystem.position.x) * 0.05;
+      particleSystem.position.y += (-mouseY * 1.0 - particleSystem.position.y) * 0.05;
 
       renderer.render(scene, camera);
     };
@@ -281,19 +281,19 @@ export const CinematicBackground = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[-2] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
       {/* WebGL Shader Layer */}
-      <div className="absolute inset-0 w-full h-full opacity-70">
+      <div className="absolute inset-0 w-full h-full opacity-80 z-[1]">
         <canvas ref={shaderCanvasRef} className="block w-full h-full" />
       </div>
 
       {/* Three.js Square Particle System */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full z-[2]">
         <div ref={particleContainerRef} className="w-full h-full" />
       </div>
 
       {/* Film Grain Noise Overlay */}
-      <div className="grain-overlay absolute inset-0" />
+      <div className="grain-overlay absolute inset-0 z-[3]" />
     </div>
   );
 };
