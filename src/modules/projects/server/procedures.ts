@@ -91,5 +91,24 @@ export const projectsRouter = createTRPCRouter({
                 });
                 return CreatedProject;
 
+            }),
+    rename: protectedProcedure
+        .input(
+            z.object({
+                id: z.string().min(1, { message: "Project ID is required" }),
+                name: z.string().min(1, { message: "Name is required" }).max(100, { message: "Name is too long" }),
             })
+        )
+        .mutation(async ({ input, ctx }) => {
+            const existingProject = await prisma.project.findUnique({
+                where: { id: input.id, userId: ctx.auth.userId },
+            });
+            if (!existingProject) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+            }
+            return await prisma.project.update({
+                where: { id: input.id },
+                data: { name: input.name.trim() },
+            });
+        }),
         })
