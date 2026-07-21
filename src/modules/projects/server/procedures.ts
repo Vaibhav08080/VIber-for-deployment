@@ -6,6 +6,7 @@ import { inngest } from "@/inngest/client"
 import { generateSlug } from "random-word-slugs";
 import { TRPCError } from "@trpc/server";
 import { ConsumeCredits } from "@/lib/usage";
+import OpenAI from "openai";
 export const projectsRouter = createTRPCRouter({
     getOne: protectedProcedure
     .input(
@@ -128,5 +129,44 @@ export const projectsRouter = createTRPCRouter({
             return await prisma.project.delete({
                 where: { id: input.id },
             });
+        }),
+    enhancePrompt: protectedProcedure
+        .input(
+            z.object({
+                prompt: z.string().min(1).max(10000),
+            })
+        )
+        .mutation(async ({ input }) => {
+            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are an expert prompt engineer for an AI-powered web app builder (like Bolt.new or v0.dev).
+Your job is to take a user's rough idea and transform it into a clear, detailed, technical prompt that will produce excellent results.
+
+Rules:
+- Keep the core idea exactly the same — don't change what they want to build
+- Add specific technical details: UI components needed, features, interactions
+- Mention design preferences if missing (modern, clean, responsive)
+- Add relevant technical stack hints if helpful
+- Keep it concise but complete (2-4 sentences max)
+- Output ONLY the enhanced prompt — no explanations, no preamble, no quotes`,
+                    },
+                    {
+                        role: "user",
+                        content: input.prompt,
+                    },
+                ],
+                temperature: 0.7,
+                max_tokens: 500,
+            });
+
+            const enhanced = response.choices[0]?.message?.content?.trim();
+            if (!enhanced) {
+                throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Enhancement failed" });
+            }
+            return { enhanced };
         }),
         })
