@@ -44,12 +44,17 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
   );
 
   useEffect(() => {
-    setTimeout(() => { inputRef.current?.select(); }, 0);
+    setTimeout(() => {
+      inputRef.current?.select();
+    }, 0);
   }, []);
 
   const handleSubmit = () => {
     const trimmed = value.trim();
-    if (!trimmed || trimmed === currentName) { onDone(); return; }
+    if (!trimmed || trimmed === currentName) {
+      onDone();
+      return;
+    }
     rename({ id: projectId, name: trimmed });
   };
 
@@ -67,14 +72,30 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
         onKeyDown={handleKeyDown}
         onBlur={handleSubmit}
         disabled={isPending}
-        className="text-sm font-medium bg-transparent border-b border-primary outline-none flex-1 min-w-0 px-0.5"
+        className="text-sm font-medium bg-transparent border-b border-[#FF6A3D] outline-none flex-1 min-w-0 px-0.5 text-[#e3e2e2]"
         maxLength={100}
       />
-      <button type="button" onClick={(e) => { e.preventDefault(); handleSubmit(); }} disabled={isPending} className="shrink-0 p-0.5 rounded hover:bg-muted">
-        <CheckIcon className="size-3 text-green-500"/>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+        disabled={isPending}
+        className="shrink-0 p-0.5 rounded hover:bg-[#292a2a]"
+      >
+        <CheckIcon className="size-3 text-emerald-400" />
       </button>
-      <button type="button" onClick={(e) => { e.preventDefault(); onDone(); }} disabled={isPending} className="shrink-0 p-0.5 rounded hover:bg-muted">
-        <XIcon className="size-3 text-muted-foreground"/>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          onDone();
+        }}
+        disabled={isPending}
+        className="shrink-0 p-0.5 rounded hover:bg-[#292a2a]"
+      >
+        <XIcon className="size-3 text-[#8e9192]" />
       </button>
     </div>
   );
@@ -83,8 +104,12 @@ const RenameInline = ({ projectId, currentName, onDone }: RenameInlineProps) => 
 export const ProjectList = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const { user } = useUser();
-  const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
+  const { user, isLoaded } = useUser();
+
+  const { data: projects } = useQuery({
+    ...trpc.projects.getMany.queryOptions(),
+    enabled: !!user,
+  });
 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deletingProject, setDeletingProject] = useState<{ id: string; name: string } | null>(null);
@@ -98,96 +123,130 @@ export const ProjectList = () => {
     })
   );
 
-  if (!user) return null;
+  if (!isLoaded || !user) return null;
 
   return (
     <>
-    <div className="w-full dark:bg-sidebar rounded-xl p-8 border flex flex-col gap-y-6 sm:gap-y-4">
-      <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
+      <div className="w-full glass-panel rounded-2xl p-6 md:p-8 border border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12">
+        <div className="flex items-center justify-between border-b border-[#444748]/20 pb-4">
+          <h2 className="text-xl md:text-2xl font-bold font-['Sora'] tracking-tight text-[#e3e2e2]">
+            {user?.firstName}&apos;s Projects
+          </h2>
+          <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
+            {projects?.length || 0} Saved
+          </span>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {projects?.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center py-12 gap-3 text-center">
-            <div className="size-14 rounded-2xl bg-muted flex items-center justify-center text-2xl">✨</div>
-            <p className="font-medium text-sm">No projects yet</p>
-            <p className="text-xs text-muted-foreground max-w-[200px]">Describe something above and Vibel will build it for you</p>
-          </div>
-        )}
-        {projects?.map((project) => (
-          <div key={project.id} className="relative group">
-            <Button
-              variant="outline"
-              className="font-normal h-auto justify-start w-full text-start p-4 pr-16"
-              asChild
-            >
-              <Link href={`/projects/${project.id}`}>
-                <div className="flex items-center gap-x-4 w-full min-w-0">
-                  <Image src="/logo.svg" alt="logo" width={32} height={32} className="object-contain shrink-0"/>
-                  <div className="flex flex-col min-w-0 flex-1">
-                    {renamingId === project.id ? (
-                      <RenameInline
-                        projectId={project.id}
-                        currentName={project.name}
-                        onDone={() => setRenamingId(null)}
-                      />
-                    ) : (
-                      <h3 className="truncate font-medium">{project.name}</h3>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(project.updatedAt, { addSuffix: true })}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            </Button>
-
-            {/* Action buttons — show on hover, hidden during rename */}
-            {renamingId !== project.id && (
-              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  type="button"
-                  title="Rename project"
-                  className="p-1.5 rounded-md hover:bg-muted"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setRenamingId(project.id); }}
-                >
-                  <PencilIcon className="size-3.5 text-muted-foreground"/>
-                </button>
-                <button
-                  type="button"
-                  title="Delete project"
-                  className="p-1.5 rounded-md hover:bg-destructive/10"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeletingProject({ id: project.id, name: project.name }); }}
-                >
-                  <Trash2Icon className="size-3.5 text-destructive"/>
-                </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {projects?.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12 gap-3 text-center">
+              <div className="size-14 rounded-2xl bg-[#1e2020] border border-[#444748]/30 flex items-center justify-center text-2xl">
+                ✨
               </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+              <p className="font-medium text-sm text-[#e3e2e2]">No projects yet</p>
+              <p className="text-xs text-[#8e9192] max-w-[220px]">
+                Describe your application above and Vibel will generate it for you.
+              </p>
+            </div>
+          )}
+          {projects?.map((project) => (
+            <div key={project.id} className="relative group">
+              <Button
+                variant="outline"
+                className="font-normal h-auto justify-start w-full text-start p-4 pr-16 bg-[#121414]/80 border-[#444748]/30 hover:border-[#FF6A3D]/50 hover:bg-[#1a1c1c] transition-all rounded-xl"
+                asChild
+              >
+                <Link href={`/projects/${project.id}`}>
+                  <div className="flex items-center gap-x-3.5 w-full min-w-0">
+                    <Image
+                      src="/logo.svg"
+                      alt="logo"
+                      width={30}
+                      height={30}
+                      className="object-contain shrink-0 brightness-125"
+                    />
+                    <div className="flex flex-col min-w-0 flex-1">
+                      {renamingId === project.id ? (
+                        <RenameInline
+                          projectId={project.id}
+                          currentName={project.name}
+                          onDone={() => setRenamingId(null)}
+                        />
+                      ) : (
+                        <h3 className="truncate font-semibold text-sm text-[#e3e2e2] group-hover:text-[#FF6A3D] transition-colors">
+                          {project.name}
+                        </h3>
+                      )}
+                      <p className="text-xs text-[#8e9192] font-mono mt-0.5">
+                        {formatDistanceToNow(project.updatedAt, { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </Button>
 
-    {/* Delete confirmation dialog */}
-    <AlertDialog open={!!deletingProject} onOpenChange={(open) => { if (!open) setDeletingProject(null); }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete &quot;{deletingProject?.name}&quot;?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete this project along with all its messages and generated code. This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => deletingProject && deleteProject({ id: deletingProject.id })}
-          >
-            {isDeleting ? "Deleting..." : "Delete project"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+              {/* Action buttons */}
+              {renamingId !== project.id && (
+                <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    title="Rename project"
+                    className="p-1.5 rounded-md hover:bg-[#292a2a] text-[#8e9192] hover:text-[#e3e2e2] transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setRenamingId(project.id);
+                    }}
+                  >
+                    <PencilIcon className="size-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    title="Delete project"
+                    className="p-1.5 rounded-md hover:bg-rose-950/40 text-rose-400 hover:text-rose-300 transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setDeletingProject({ id: project.id, name: project.name });
+                    }}
+                  >
+                    <Trash2Icon className="size-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog
+        open={!!deletingProject}
+        onOpenChange={(open) => {
+          if (!open) setDeletingProject(null);
+        }}
+      >
+        <AlertDialogContent className="bg-[#121414] border-[#444748]/50 text-[#e3e2e2]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-['Sora']">Delete &quot;{deletingProject?.name}&quot;?</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#8e9192]">
+              This will permanently delete this project along with all its messages and generated code. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting} className="border-[#444748]/50 text-[#e3e2e2] hover:bg-[#292a2a]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              className="bg-rose-600 text-white hover:bg-rose-700"
+              onClick={() => deletingProject && deleteProject({ id: deletingProject.id })}
+            >
+              {isDeleting ? "Deleting..." : "Delete project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

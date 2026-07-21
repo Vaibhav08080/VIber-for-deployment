@@ -30,15 +30,20 @@ export const projectsRouter = createTRPCRouter({
         return existingProject;
     }),
     getMany: protectedProcedure.query(async ({ctx}) => {
-        const projects = await prisma.project.findMany({
-            where:{
-                userId:ctx.auth.userId
-            },
-            orderBy: {
-                updatedAt: "desc"
-            },
-        })
-        return projects;
+        try {
+            const projects = await prisma.project.findMany({
+                where:{
+                    userId:ctx.auth.userId
+                },
+                orderBy: {
+                    updatedAt: "desc"
+                },
+            });
+            return projects;
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            return [];
+        }
     }),
     create: protectedProcedure
         .input(

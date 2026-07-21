@@ -16,6 +16,8 @@ import { useRouter } from "next/navigation";
 import { Hint } from "./hint";
 import { SpeechRecognitionButton } from "@/components/speech-recognition-button";
 
+import { useUser } from "@clerk/nextjs";
+
 interface Props {
   projectId: string;
 }
@@ -31,7 +33,11 @@ export const MessageForm = ({ projectId }: Props) => {
     const trpc = useTRPC();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { data: usage } = useQuery(trpc.usage.status.queryOptions());
+    const { user } = useUser();
+    const { data: usage } = useQuery({
+      ...trpc.usage.status.queryOptions(),
+      enabled: !!user,
+    });
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),

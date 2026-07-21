@@ -1,27 +1,26 @@
+"use client";
 
-"use client"
-import { SignIn } from '@clerk/nextjs'
-import { useCurrentTheme } from '@/hooks/use-current-theme'
-import {dark} from "@clerk/themes"
+import { SignIn } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
+import { CinematicBackground } from "@/components/cinematic-background";
 
-const Page =() => {
-    const currentTheme = useCurrentTheme();
+const SignInPage = () => {
   return (
-    <div className="flex flex-col max-w-3xl mx-auto w-full">
-        <section className="space-y-6 py-[16vh] 2xl:py-48">
-            <div className="flex flex-col items-center">
-                <SignIn
-                appearance={{
-                    baseTheme:currentTheme === "dark" ? dark : undefined,
-                    elements:{
-                        cardbox: "border! shadow-none! rounded-lg!"
-                    }
-                }}
-                />
-            </div>
-        </section>
-    </div>
-  )
-}
+    <div className="relative min-h-screen bg-[#090909] text-[#e3e2e2] flex flex-col items-center justify-center py-12 px-6">
+      <CinematicBackground />
 
-export default Page
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center space-y-6">
+        <SignIn
+          appearance={{
+            baseTheme: dark,
+            elements: {
+              card: "border! border-[#444748]/40! shadow-2xl! rounded-2xl! bg-[#121414]/90! backdrop-blur-xl",
+            },
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default SignInPage;

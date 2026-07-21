@@ -77,14 +77,21 @@ export default function RootLayout({
         }
       }>
     <TRPCReactProvider>
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Geist:wght@400;600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#090909] text-[#e3e2e2] selection:bg-[#ab2f01] selection:text-[#ffc8b9]`}
       >
         <ThemeProvider 
         attribute="class"
-        defaultTheme="system"
-        enableSystem
+        defaultTheme="dark"
+        forcedTheme="dark"
+        enableSystem={false}
         disableTransitionOnChange
         >
           <Toaster/>  
