@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
 import { PencilIcon, CheckIcon, XIcon, Trash2Icon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,12 +114,27 @@ export const ProjectList = () => {
 
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [deletingProject, setDeletingProject] = useState<{ id: string; name: string } | null>(null);
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
   const { mutate: deleteProject, isPending: isDeleting } = useMutation(
     trpc.projects.delete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
         setDeletingProject(null);
+        toast.success("Project deleted");
+      },
+    })
+  );
+
+  const { mutate: deleteAllProjects, isPending: isDeletingAll } = useMutation(
+    trpc.projects.deleteAll.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
+        setShowDeleteAllDialog(false);
+        toast.success("Deleted all projects");
+      },
+      onError: (err) => {
+        toast.error(err.message || "Failed to delete all projects");
       },
     })
   );
@@ -128,13 +144,26 @@ export const ProjectList = () => {
   return (
     <>
       <div className="w-full glass-panel rounded-2xl p-6 md:p-8 border border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12">
-        <div className="flex items-center justify-between border-b border-[#444748]/20 pb-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#444748]/20 pb-4">
           <h2 className="text-xl md:text-2xl font-bold font-['Sora'] tracking-tight text-[#e3e2e2]">
             {user?.firstName}&apos;s Projects
           </h2>
-          <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
-            {projects?.length || 0} Saved
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
+              {projects?.length || 0} Saved
+            </span>
+            {!!projects && projects.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteAllDialog(true)}
+                className="text-xs font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-950/50 px-3 py-1 rounded-full border border-rose-900/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Delete all projects"
+              >
+                <Trash2Icon className="size-3.5" />
+                <span>Delete All</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
@@ -219,7 +248,7 @@ export const ProjectList = () => {
         </div>
       </div>
 
-      {/* Delete confirmation dialog */}
+      {/* Delete single project confirmation dialog */}
       <AlertDialog
         open={!!deletingProject}
         onOpenChange={(open) => {
@@ -243,6 +272,37 @@ export const ProjectList = () => {
               onClick={() => deletingProject && deleteProject({ id: deletingProject.id })}
             >
               {isDeleting ? "Deleting..." : "Delete project"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete ALL projects confirmation dialog */}
+      <AlertDialog
+        open={showDeleteAllDialog}
+        onOpenChange={(open) => {
+          if (!open) setShowDeleteAllDialog(false);
+        }}
+      >
+        <AlertDialogContent className="bg-[#121414] border-rose-900/40 text-[#e3e2e2]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-['Sora'] text-rose-400">
+              Delete All {projects?.length} Projects?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#8e9192]">
+              This will permanently delete all <strong className="text-[#e3e2e2]">{projects?.length}</strong> of your projects, including all generated code, messages, and history. This action CANNOT be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingAll} className="border-[#444748]/50 text-[#e3e2e2] hover:bg-[#292a2a]">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeletingAll}
+              className="bg-rose-600 text-white hover:bg-rose-700 font-bold"
+              onClick={() => deleteAllProjects()}
+            >
+              {isDeletingAll ? "Deleting All..." : `Delete All ${projects?.length} Projects`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

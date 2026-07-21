@@ -135,6 +135,19 @@ export const projectsRouter = createTRPCRouter({
                 where: { id: input.id },
             });
         }),
+    deleteAll: protectedProcedure.mutation(async ({ ctx }) => {
+        try {
+            return await prisma.project.deleteMany({
+                where: { userId: ctx.auth.userId },
+            });
+        } catch (error) {
+            console.error("Error deleting all projects:", error);
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to delete projects",
+            });
+        }
+    }),
     enhancePrompt: protectedProcedure
         .input(
             z.object({
