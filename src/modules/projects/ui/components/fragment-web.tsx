@@ -1,8 +1,10 @@
 import { Fragment } from "@prisma/client";
 import { useState } from "react";
-import { ExternalLinkIcon, RefreshCcwIcon } from "lucide-react";
+import { ExternalLinkIcon, RefreshCcwIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hint } from "./hint";
+import JSZip from "jszip";
+
 interface Props {
   data: Fragment;
 }
@@ -10,9 +12,12 @@ interface Props {
 export const FragmentWeb = ({ data }: Props) => {
     const [fragmentKey, setFragmentKey] = useState(0);
     const [copied, setCopied] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+
     const onRefresh = () => {
         setFragmentKey((prev) => prev + 1);
     }
+
     const handleCopy = () => {
         navigator.clipboard.writeText(data.sandboxUrl);
         setCopied(true);
@@ -20,15 +25,47 @@ export const FragmentWeb = ({ data }: Props) => {
             setCopied(false);
         }, 2000);
     }
+
+    const handleDownload = async () => {
+        if (!data.files || downloading) return;
+        setDownloading(true);
+        try {
+            const zip = new JSZip();
+            const files = data.files as { [path: string]: string };
+
+            for (const [filePath, content] of Object.entries(files)) {
+                // Strip leading slash if present
+                const normalizedPath = filePath.startsWith("/")
+                    ? filePath.slice(1)
+                    : filePath;
+                zip.file(normalizedPath, content);
+            }
+
+            const blob = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${data.title.replace(/\s+/g, "-").toLowerCase()}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Failed to download ZIP:", err);
+        } finally {
+            setDownloading(false);
+        }
+    };
+
   return (
     <div className="flex flex-col w-full h-full">
       <div className="p-2 border-b bg-sidebar flex items-center gap-x-2">
-        <Hint text= "Refresh " side ="bottom" >
+        <Hint text="Refresh" side="bottom">
         <Button size="sm" variant="outline" onClick={onRefresh}>
           <RefreshCcwIcon />
         </Button>
         </Hint>
-        <Hint text= "Click to copy " side ="bottom" >
+        <Hint text="Click to copy" side="bottom">
         <Button size="sm"
          variant="outline" 
          onClick={handleCopy}
@@ -37,7 +74,7 @@ export const FragmentWeb = ({ data }: Props) => {
           <span className="truncate">{data.sandboxUrl}</span>
         </Button>
         </Hint>
-        <Hint text= "Open in a new tab " side ="bottom" align="start">
+        <Hint text="Open in a new tab" side="bottom" align="start">
         <Button
         size="sm"
         disabled={!data.sandboxUrl}
@@ -47,6 +84,16 @@ export const FragmentWeb = ({ data }: Props) => {
             window.open(data.sandboxUrl, "_blank");
         }}>
           <ExternalLinkIcon/>
+        </Button>
+        </Hint>
+        <Hint text="Download as ZIP" side="bottom" align="end">
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={!data.files || downloading}
+          onClick={handleDownload}
+        >
+          <DownloadIcon className={downloading ? "animate-bounce" : ""} />
         </Button>
         </Hint>
       </div>
