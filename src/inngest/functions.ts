@@ -19,7 +19,9 @@ export const CodeAgentFunction = inngest.createFunction(
   async ({ event, step }) => {
 
     const SandboxId = await step.run("get-sandbox-id", async () => {
-      const sandbox = await Sandbox.create("viber-nextjs");
+      const sandbox = await Sandbox.create("viber-nextjs", {
+        timeoutMs: 60 * 60 * 1000, // 1 hour (Pro plan supports up to 24h)
+      });
       return sandbox.sandboxId;
     });
 
