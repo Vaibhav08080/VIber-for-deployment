@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { useRouter } from "next/navigation";
 import { PROJECT_TEMPLATES } from "../../constants";
 import { useClerk } from "@clerk/nextjs";
+import { SpeechRecognitionButton } from "@/components/speech-recognition-button";
 
 const FormSchema = z.object({
   value: z
@@ -118,6 +119,16 @@ export const ProjectForm = () => {
                 <div className="flex gap-x-2 items-end justify-between pt-2">
                     {/* Left: Enhance + keyboard hint */}
                     <div className="flex items-center gap-x-2">
+                        <SpeechRecognitionButton
+                            disabled={isPending || isEnhancing}
+                            getCurrentValue={() => form.getValues("value")}
+                            onTranscript={(transcript) =>
+                                form.setValue("value", transcript, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                })
+                            }
+                        />
                         <Button
                             type="button"
                             variant="outline"

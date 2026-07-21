@@ -14,6 +14,7 @@ import { Usage } from "./usage";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Hint } from "./hint";
+import { SpeechRecognitionButton } from "@/components/speech-recognition-button";
 
 interface Props {
   projectId: string;
@@ -122,6 +123,16 @@ export const MessageForm = ({ projectId }: Props) => {
                 <div className="flex gap-x-2 items-end justify-between pt-2">
                     {/* Left: Enhance button + keyboard hint */}
                     <div className="flex items-center gap-x-2">
+                        <SpeechRecognitionButton
+                            disabled={isPending || isEnhancing}
+                            getCurrentValue={() => form.getValues("value")}
+                            onTranscript={(transcript) =>
+                                form.setValue("value", transcript, {
+                                    shouldValidate: true,
+                                    shouldDirty: true,
+                                })
+                            }
+                        />
                         <Hint text="Enhance prompt with AI ✨" side="top">
                             <Button
                                 type="button"
