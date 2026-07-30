@@ -116,7 +116,7 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-sidebar border border-border shadow-xl rounded-2xl">
+      <DialogContent className="sm:max-w-md bg-card text-card-foreground dark:bg-zinc-950 border border-border/80 shadow-2xl rounded-2xl p-6">
         <DialogHeader className="gap-1">
           <div className="flex items-center gap-2 text-foreground">
             <div className="p-2 rounded-xl bg-foreground/5 dark:bg-foreground/10 border border-border">
@@ -184,7 +184,7 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
           /* Connected View */
           <div className="flex flex-col gap-4 py-2">
             {/* Account Badge */}
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/60 border border-border text-xs">
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/80 dark:bg-zinc-900 border border-border text-xs">
               <div className="flex items-center gap-2">
                 {githubUser?.avatar_url && (
                   <img
@@ -206,7 +206,7 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
             {existingRepoUrl ? (
               /* Already Exported / Synced View */
               <div className="flex flex-col gap-3">
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex flex-col gap-1.5">
+                <div className="p-3.5 rounded-xl bg-emerald-500/10 dark:bg-emerald-950/40 border border-emerald-500/30 flex flex-col gap-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                       <CheckCircle2Icon className="size-4" /> Connected & Auto-Sync Enabled
