@@ -7,13 +7,21 @@ import { Code2Icon, ChevronRightIcon, CheckCircle2Icon, HistoryIcon } from "luci
 
 interface UserMessageProps{
     content:string;
+    imageUrl?: string | null;
 }
 
-const UserMessage = ({content}:UserMessageProps)=>{
+const UserMessage = ({content, imageUrl}:UserMessageProps)=>{
     return(
         <div className="flex justify-end pb-4 pr-2 pl-10">
-            <Card className="rounded-lg bg-muted dark:bg-zinc-800 p-3 shadow-none border-none max-w-[80%] break-words">
-                {content}
+            <Card className="rounded-lg bg-muted dark:bg-zinc-800 p-3 shadow-none border-none max-w-[80%] break-words flex flex-col gap-2">
+                {imageUrl && (
+                    <img
+                        src={imageUrl}
+                        alt="User screenshot attachment"
+                        className="max-h-60 rounded-md object-contain border border-black/10 dark:border-white/10"
+                    />
+                )}
+                {content && <span>{content}</span>}
             </Card>
         </div>
     )
@@ -112,6 +120,7 @@ const AssistantMessage =({
 
 interface MessageCardProps{
     content:string;
+    imageUrl?: string | null;
     role:MessageRole;
     fragment: Fragment | null;
     CreatedAt:Date;
@@ -122,6 +131,7 @@ interface MessageCardProps{
 
 export const MessageCard=({
     content,
+    imageUrl,
     role,
     fragment,
     CreatedAt,
@@ -141,6 +151,6 @@ export const MessageCard=({
             />
         )
     return(
-        <UserMessage content={content}/>
+        <UserMessage content={content} imageUrl={imageUrl}/>
     )
 }

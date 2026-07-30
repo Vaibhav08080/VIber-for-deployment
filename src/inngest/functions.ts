@@ -36,11 +36,22 @@ export const CodeAgentFunction = inngest.createFunction(
       },
     })
     for (const message of messages) {
-      formattedMessages.push({
-        type:"text",
-        role: message.role ==="ASSISTANT" ? "assistant" : "user",
-        content: message.content,
-      });
+      if (message.imageUrl) {
+        formattedMessages.push({
+          type: "text",
+          role: message.role === "ASSISTANT" ? "assistant" : "user",
+          content: [
+            { type: "text", text: message.content },
+            { type: "image_url", image_url: { url: message.imageUrl } }
+          ] as any,
+        });
+      } else {
+        formattedMessages.push({
+          type: "text",
+          role: message.role === "ASSISTANT" ? "assistant" : "user",
+          content: message.content,
+        });
+      }
     }
     return formattedMessages;
  })  

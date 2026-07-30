@@ -49,6 +49,7 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
                         <MessageCard
                             key={message.id}
                             content={message.content}
+                            imageUrl={message.imageUrl}
                             role={message.role}
                             type={message.type}
                             fragment={message.fragment}
