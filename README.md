@@ -1,120 +1,74 @@
-# SparkSite
+# SparkSite ⚡
 
-**English**
+> **Instant AI-Powered Web Application Builder**  
+> Build, preview, and deploy high-fidelity web applications instantly by chatting with AI.
 
----
-
-## What is SparkSite?
-SparkSite is a modern web application that lets you create websites simply by chatting with AI. It combines the power of Next.js, Clerk authentication, and TRPC APIs to provide a seamless, interactive, and collaborative experience for building and managing projects.
-
-## Features
-- **AI-powered Website Creation:** Build websites by having a conversation with an AI assistant.
-- **Project Management:** Create, view, and organize your projects in a user-friendly dashboard.
-- **User Authentication:** Secure sign-in and sign-up using Clerk.
-- **Flexible Pricing:** Free credits for new users and upgrade options for more usage.
-- **Modern UI:** Responsive, theme-aware design with support for light and dark modes.
-- **Component Templates:** Quickly start with templates like YouTube, e-commerce, Airbnb, Spotify, and more.
-
-## Getting Started
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-2. **Run the development server:**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-3. **Sign Up / Sign In:**
-   Create an account or sign in to start creating projects.
-
-4. **Create a Project:**
-   Use the chat interface to describe what you want to build, or select from ready-made templates.
-
-## Scripts
-- `dev`: Start the development server
-- `build`: Build for production
-- `start`: Start the production server
-- `lint`: Lint the codebase
-- `postinstall`: Generate Prisma client
-
-## Technologies Used
-- Next.js
-- React
-- Clerk (Authentication)
-- Prisma (Database)
-- TRPC (API)
-- Tailwind CSS
-
-## Credits
-- Inspired by modern AI-driven web builders
-- Uses open source libraries and Next.js ecosystem
-
-## License
-See [LICENSE](./LICENSE) for details.
+Created with ❤️ by **[Vaibhav](https://www.linkedin.com/in/vaibhavkumarprince/)**
 
 ---
 
-# वाइबेल - हिंदी
+## 📐 System Design & Architecture
 
-## वाइबेल क्या है?
-वाइबेल एक आधुनिक वेब एप्लिकेशन है जो आपको AI के साथ चैट करके वेबसाइट बनाने देता है। इसमें Next.js, Clerk ऑथेंटिकेशन और TRPC API का उपयोग करके प्रोजेक्ट बनाना और प्रबंधित करना बेहद आसान है।
+![SparkSite System Architecture](./public/sparksite%20architecture.png)
 
-## मुख्य विशेषताएँ
-- **AI से वेबसाइट बनाएं:** AI असिस्टेंट से बात करके वेबसाइट बनाएं।
-- **प्रोजेक्ट प्रबंधन:** अपने प्रोजेक्ट्स को डैशबोर्ड पर बनाएं, देखें और व्यवस्थित करें।
-- **यूज़र लॉगिन/साइनअप:** Clerk के साथ सुरक्षित लॉगिन और साइनअप।
-- **फ्री और पेड प्लान:** नए यूज़र्स के लिए फ्री क्रेडिट्स और ज़्यादा इस्तेमाल के लिए अपग्रेड विकल्प।
-- **आधुनिक यूआई:** हल्के और डार्क मोड के साथ रेस्पॉन्सिव डिज़ाइन।
-- **टेम्पलेट्स:** यूट्यूब, ई-कॉमर्स, एयरबीएनबी, स्पॉटिफाई जैसे रेडीमेड टेम्पलेट्स।
+---
 
-## कैसे शुरू करें
+## ✨ Features
 
-1. **डिपेंडेंसी इंस्टॉल करें:**
-   ```bash
-   npm install
-   # या
-   yarn install
-   ```
-2. **डेवलपमेंट सर्वर चलाएं:**
-   ```bash
-   npm run dev
-   # या
-   yarn dev
-   ```
-   अपने ब्राउज़र में [http://localhost:3000](http://localhost:3000) खोलें।
+- 💬 **Conversational AI Builder:** Generate full-stack modern web apps using natural language prompts.
+- ⚡ **Live Preview & Code Explorer:** Real-time web preview with an embedded code editor and virtual file system.
+- 🎨 **Cinematic Layout Engine:** High-fidelity, responsive UI layouts tailored with dark mode and sleek glassmorphism aesthetics.
+- 🔒 **Secure User Authentication:** Seamless sign-in & sign-up powered by Clerk.
+- 🗄️ **Robust Database Storage:** Relational project management powered by PostgreSQL and Prisma ORM.
+- 🚀 **Edge Ready:** Built for speed with sub-100ms response times.
 
-3. **साइन अप / साइन इन करें:**
-   अकाउंट बनाएं या लॉगिन करें और प्रोजेक्ट बनाना शुरू करें।
+---
 
-4. **प्रोजेक्ट बनाएं:**
-   चैट इंटरफेस में लिखें कि आपको क्या वेबसाइट चाहिए, या रेडीमेड टेम्पलेट चुनें।
+## 🛠️ Tech Stack
 
-## स्क्रिप्ट्स
-- `dev`: डेवलपमेंट सर्वर चलाएं
-- `build`: प्रोडक्शन के लिए बिल्ड करें
-- `start`: प्रोडक्शन सर्वर चलाएं
-- `lint`: कोडबेस जांचें
-- `postinstall`: Prisma क्लाइंट जनरेट करें
+- **Framework:** Next.js 15 (App Router, React 19)
+- **Styling:** Tailwind CSS v4, Lucide Icons, Sora & Geist typography
+- **Authentication:** Clerk Auth
+- **Database & ORM:** PostgreSQL, Prisma ORM
+- **API Layer:** tRPC, TanStack Query
+- **Async Execution:** Inngest Queue
+- **Sandbox Environment:** E2B Code Interpreter
 
-## टेक्नोलॉजी
-- Next.js
-- React
-- Clerk (ऑथेंटिकेशन)
-- Prisma (डेटाबेस)
-- TRPC (API)
-- Tailwind CSS
+---
 
-## क्रेडिट्स
-- आधुनिक AI वेब बिल्डर्स से प्रेरित
-- ओपन सोर्स लाइब्रेरी और Next.js इकोसिस्टम का उपयोग
+## 🚀 Getting Started
 
-## लाइसेंस
-विवरण के लिए [LICENSE](./LICENSE) देखें।
+### 1. Install Dependencies
+```bash
+npm install
+```
 
+### 2. Set Up Environment Variables
+Create a `.env.local` file in the root directory and add your keys:
+```env
+DATABASE_URL="your-postgresql-database-url"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your-clerk-publishable-key"
+CLERK_SECRET_KEY="your-clerk-secret-key"
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📜 Available Scripts
+
+- `npm run dev`: Start Next.js development server
+- `npm run build`: Build production bundle
+- `npm run start`: Run production server
+- `npm run lint`: Run ESLint checks
+
+---
+
+## 👤 Author
+
+**Vaibhav**
+- LinkedIn: [https://www.linkedin.com/in/vaibhavkumarprince/](https://www.linkedin.com/in/vaibhavkumarprince/)
