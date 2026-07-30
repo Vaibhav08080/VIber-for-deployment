@@ -25,6 +25,8 @@ import {
   RocketIcon,
 } from "lucide-react";
 
+import { useClerk } from "@clerk/nextjs";
+
 interface Props {
   projectId: string;
   projectName: string;
@@ -35,6 +37,7 @@ interface Props {
 export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: Props) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const clerk = useClerk();
 
   const sanitizedDefaultRepoName = projectName
     .toLowerCase()
@@ -117,18 +120,19 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
                 <span>GitHub Account Not Linked</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                To export repositories to your personal GitHub account, please make sure you are signed in with GitHub or link your GitHub account in your Clerk settings.
+                To export repositories to your personal GitHub account, please make sure you connect your GitHub account in your Clerk profile settings.
               </p>
             </div>
             <Button
               variant="outline"
               className="w-full gap-2 border-border hover:bg-muted"
               onClick={() => {
-                window.open("/user-profile", "_blank");
+                onClose();
+                clerk.openUserProfile();
               }}
             >
               <GithubIcon className="size-4" />
-              <span>Link GitHub via Profile</span>
+              <span>Link GitHub Account via Profile</span>
             </Button>
           </div>
         ) : (
