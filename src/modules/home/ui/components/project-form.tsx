@@ -16,6 +16,8 @@ import { PROJECT_TEMPLATES } from "../../constants";
 import { useClerk } from "@clerk/nextjs";
 import { SpeechRecognitionButton } from "@/components/speech-recognition-button";
 
+import { compressImage } from "@/lib/compress-image";
+
 const FormSchema = z.object({
   value: z
     .string()
@@ -36,21 +38,18 @@ export const ProjectForm = () => {
     defaultValues: { value: "" },
   });
 
-  const handleImageFile = (file: File) => {
+  const handleImageFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image size must be less than 10MB");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImageDataUrl(reader.result as string);
+    try {
+      const compressed = await compressImage(file);
+      setImageDataUrl(compressed);
       toast.success("Image attached! 📎");
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      toast.error("Failed to process image.");
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
