@@ -6,6 +6,8 @@ import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
 import { prisma } from "@/lib/db";
 import OpenAI from "openai";
+import { pushFilesToGitHubRepo } from "@/lib/github";
+import { clerkClient } from "@clerk/nextjs/server";
 
 interface AgentState{
   summary: string;
@@ -407,6 +409,38 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
           }
         }
       });
+
+      // --- Progress: Auto-sync to GitHub if repo connected ---
+      const project = await prisma.project.findUnique({
+        where: { id: event.data.projectId },
+        select: { githubRepo: true, userId: true },
+      });
+
+      if (project?.githubRepo && result.state.data.files) {
+        await step.run("sync-github-repo", async () => {
+          try {
+            await updateProgress(event.data.projectId, "Syncing code to GitHub...");
+            const client = await clerkClient();
+            const tokens = await client.users.getUserOauthAccessToken(project.userId, "oauth_github");
+            const token = tokens.data[0]?.token;
+
+            if (token) {
+              const [owner, repo] = project.githubRepo!.split("/");
+              await pushFilesToGitHubRepo(
+                token,
+                owner,
+                repo,
+                result.state.data.files,
+                `Auto-sync update from SparkSite AI`
+              );
+              await completeProgress(event.data.projectId, "Syncing code to GitHub...");
+            }
+          } catch (err) {
+            console.error("GitHub auto-sync warning:", err);
+          }
+        });
+      }
+
       await cleanupProgress(event.data.projectId);
       return msg;
     })

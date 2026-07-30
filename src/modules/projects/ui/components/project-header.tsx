@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
+import { GitHubExportModal } from "./github-export-modal";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -12,8 +13,10 @@ import {
   CheckIcon,
   XIcon,
   Trash2Icon,
+  GithubIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Hint } from "./hint";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +57,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
     const [isEditing, setIsEditing] = useState(false);
     const [draftName, setDraftName] = useState(project.name);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showGithubModal, setShowGithubModal] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { mutate: rename, isPending: isRenaming } = useMutation(
@@ -105,86 +109,101 @@ export const ProjectHeader = ({ projectId }: Props) => {
 
     return (
     <>
-    <header className="p-2 flex justify-between items-center border-b">
+    <header className="p-2 border-b bg-sidebar flex items-center justify-between gap-x-2">
         {isEditing ? (
-            <div className="flex items-center gap-1 pl-2">
-                <Image src="/logo.svg" alt="Vibe" width={18} height={18} className="shrink-0"/>
+            <div className="flex items-center gap-1">
                 <input
                     ref={inputRef}
+                    type="text"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    onBlur={handleSubmit}
                     disabled={isRenaming}
-                    className="text-sm font-medium bg-transparent border-b border-primary outline-none w-40 px-1"
-                    maxLength={100}
-                    autoFocus
+                    className="h-7 px-2 text-sm font-medium bg-background border border-input rounded-md outline-none focus:ring-1 focus:ring-ring w-40 sm:w-56"
                 />
-                <Button
-                    variant="ghost" size="icon"
-                    className="size-6"
-                    onClick={handleSubmit}
-                    disabled={isRenaming}
-                >
-                    <CheckIcon className="size-3 text-green-500"/>
+                <Button size="sm" variant="ghost" onClick={handleSubmit} disabled={isRenaming} className="size-7 p-0">
+                    <CheckIcon className="size-3.5 text-emerald-500"/>
                 </Button>
-                <Button
-                    variant="ghost" size="icon"
-                    className="size-6"
-                    onClick={() => { setDraftName(project.name); setIsEditing(false); }}
-                    disabled={isRenaming}
-                >
-                    <XIcon className="size-3 text-muted-foreground"/>
+                <Button size="sm" variant="ghost" onClick={() => { setDraftName(project.name); setIsEditing(false); }} disabled={isRenaming} className="size-7 p-0">
+                    <XIcon className="size-3.5 text-muted-foreground"/>
                 </Button>
             </div>
         ) : (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2!">
-                        <Image src="/logo.svg" alt="Vibe" width={18} height={18} className="shrink-0"/>
-                        <span className="text-sm font-medium">{project.name}</span>
-                        <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start">
-                    <DropdownMenuItem asChild>
-                        <Link href="/">
-                            <ChevronLeftIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
-                            <span>Go to Home</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                        <PencilIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
-                        <span>Rename project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator/>
-                    <DropdownMenuSub>
-                        <DropdownMenuSubTrigger className="gap-2">
-                            <SunMoonIcon className="size-4 text-muted-foreground"/>
-                            <span>Appearance</span>
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
-                                    <DropdownMenuRadioItem value="light"><span>Light</span></DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="dark"><span>Dark</span></DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="system"><span>System</span></DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                            </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenuSub>
-                    <DropdownMenuSeparator/>
-                    <DropdownMenuItem
-                        onClick={() => setShowDeleteDialog(true)}
-                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
+            <div className="flex items-center gap-x-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2!">
+                            <Image src="/logo.svg" alt="SparkSite" width={18} height={18} className="shrink-0"/>
+                            <span className="text-sm font-medium">{project.name}</span>
+                            <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50"/>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" align="start">
+                        <DropdownMenuItem asChild>
+                            <Link href="/">
+                                <ChevronLeftIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
+                                <span>Go to Home</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                            <PencilIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
+                            <span>Rename project</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShowGithubModal(true)}>
+                            <GithubIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
+                            <span>Export / Sync to GitHub</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator/>
+                        <DropdownMenuSub>
+                            <DropdownMenuSubTrigger className="gap-2">
+                                <SunMoonIcon className="size-4 text-muted-foreground"/>
+                                <span>Appearance</span>
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuPortal>
+                                <DropdownMenuSubContent>
+                                    <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+                                        <DropdownMenuRadioItem value="light"><span>Light</span></DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="dark"><span>Dark</span></DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="system"><span>System</span></DropdownMenuRadioItem>
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuSubContent>
+                            </DropdownMenuPortal>
+                        </DropdownMenuSub>
+                        <DropdownMenuSeparator/>
+                        <DropdownMenuItem
+                            onClick={() => setShowDeleteDialog(true)}
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                        >
+                            <Trash2Icon className="mr-2 h-4 w-4 shrink-0"/>
+                            <span>Delete project</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Hint text={project.githubRepo ? "GitHub Repo Synced ⚡" : "Export project to GitHub 🐙"} side="bottom">
+                    <Button
+                        size="sm"
+                        variant={project.githubRepo ? "secondary" : "outline"}
+                        onClick={() => setShowGithubModal(true)}
+                        className="gap-1.5 text-xs h-7 px-2 font-mono transition-all"
                     >
-                        <Trash2Icon className="mr-2 h-4 w-4 shrink-0"/>
-                        <span>Delete project</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                        <GithubIcon className="size-3.5" />
+                        <span className="hidden sm:inline">
+                            {project.githubRepo ? "GitHub Synced" : "GitHub"}
+                        </span>
+                    </Button>
+                </Hint>
+            </div>
         )}
     </header>
+
+    {/* GitHub Export Modal */}
+    <GitHubExportModal
+        projectId={projectId}
+        projectName={project.name}
+        isOpen={showGithubModal}
+        onClose={() => setShowGithubModal(false)}
+    />
 
     {/* Confirmation Dialog */}
     <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

@@ -4,11 +4,14 @@ import {  createTRPCRouter } from '../init';
 import { messagesRouter } from '@/modules/mesages/server/procedures';
 import { usageRouter } from '@/modules/usage/server/procedure';
 import { progressRouter } from '@/modules/progress/server/procedures';
+import { githubRouter } from '@/modules/github/server/procedures';
+
 export const appRouter = createTRPCRouter({
   messages: messagesRouter,
   projects: projectsRouter,
-  usage:usageRouter,
+  usage: usageRouter,
   progress: progressRouter,
+  github: githubRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
