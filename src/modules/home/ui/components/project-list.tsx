@@ -174,7 +174,7 @@ export const ProjectList = () => {
               </div>
               <p className="font-medium text-sm text-[#090909] dark:text-[#e3e2e2]">No projects yet</p>
               <p className="text-xs text-neutral-500 dark:text-[#8e9192] max-w-[220px]">
-                Describe your application above and Vibel will generate it for you.
+                Describe your application above and SparkSite will generate it for you.
               </p>
             </div>
           )}

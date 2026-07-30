@@ -86,7 +86,7 @@ export default function Home() {
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
                 <div className="mx-auto bg-neutral-200 dark:bg-[#292a2a] px-4 py-0.5 rounded text-[10px] font-mono text-neutral-600 dark:text-[#8e9192]">
-                  vibel.app/preview/active
+                  sparksite.dev/preview/active
                 </div>
               </div>
               <div className="p-6 space-y-4">
@@ -107,12 +107,12 @@ export default function Home() {
             {/* Code Snippet Overlay (Crisp Dark Slate Box for high-end look) */}
             <div className="absolute bottom-12 left-4 w-[290px] p-4 rounded-xl border border-slate-700/80 font-mono text-xs shadow-2xl backdrop-blur-xl bg-[#0f172a] text-slate-100">
               <div className="flex justify-between items-center mb-3 border-b border-slate-700/60 pb-2">
-                <span className="text-[#FF6A3D] font-semibold text-xs">vibel.config.js</span>
+                <span className="text-[#FF6A3D] font-semibold text-xs">sparksite.config.js</span>
                 <span className="material-symbols-outlined text-slate-400 text-sm">terminal</span>
               </div>
               <pre className="text-slate-300 text-[11px] leading-relaxed">
                 <span className="text-[#FF6A3D]">export default</span> &#123;<br />
-                &nbsp;&nbsp;engine: <span className="text-amber-300">&apos;vibel-ultra&apos;</span>,<br />
+                &nbsp;&nbsp;engine: <span className="text-amber-300">&apos;sparksite-ultra&apos;</span>,<br />
                 &nbsp;&nbsp;precision: <span className="text-emerald-400">0.98</span>,<br />
                 &nbsp;&nbsp;render: <span className="text-amber-300">&apos;cinematic&apos;</span><br />
                 &#125;
@@ -123,13 +123,13 @@ export default function Home() {
             <div className="absolute bottom-0 right-8 w-[330px] bg-[#090d16] p-4 rounded-xl border border-emerald-900/60 font-mono text-xs text-emerald-400 shadow-2xl">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-slate-400">$</span>
-                <span className="text-white">vibel deploy --live</span>
+                <span className="text-white">sparksite deploy --live</span>
               </div>
-              <div className="text-slate-400 text-[11px] space-y-1">
+              <div className="text-[#8e9192] text-[11px] space-y-1">
                 <div>&gt; Optimizing cinematic assets...</div>
                 <div>&gt; Syncing WebGL shader state...</div>
                 <div className="text-[#FF6A3D] font-semibold pt-1">
-                  ✓ Deployment live at vibel.io/p/4x
+                  ✓ Deployment live at sparksite.dev/p/4x
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 2. Vibel Editor (Prompt UI) */}
+        {/* 2. SparkSite Editor (Prompt UI) */}
         <section id="prompt-builder" className="max-w-[1440px] mx-auto px-6 md:px-20 py-12 scroll-mt-32">
           <div className="text-center mb-8">
             <span className="text-xs uppercase font-mono tracking-[0.3em] text-[#FF6A3D]">
@@ -196,7 +196,7 @@ export default function Home() {
                 Engine.
               </h2>
               <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
-                Vibel doesn&apos;t just write code; it architecturally understands intent. Using our proprietary Cinematic LLM, we generate high-fidelity layouts that respect your design system&apos;s soul.
+                SparkSite doesn&apos;t just write code; it architecturally understands intent. Using our proprietary Cinematic LLM, we generate high-fidelity layouts that respect your design system&apos;s soul.
               </p>
               <div className="pt-2">
                 <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
@@ -251,7 +251,7 @@ export default function Home() {
                 Deployment.
               </h2>
               <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base sm:text-lg leading-relaxed max-w-md">
-                Deploy your Vibel-generated apps instantly to the edge. Our native integration with Vercel and AWS ensures sub-100ms response times globally.
+                Deploy your SparkSite-generated apps instantly to the edge. Our native integration with Vercel and AWS ensures sub-100ms response times globally.
               </p>
               <div className="pt-2">
                 <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
@@ -269,7 +269,7 @@ export default function Home() {
               Gallery
             </span>
             <h2 className="font-['Sora'] text-4xl font-extrabold text-[#090909] dark:text-[#e3e2e2] tracking-tight uppercase">
-              Created With Vibel
+              Created With SparkSite
             </h2>
             <p className="font-['Geist'] text-neutral-600 dark:text-[#c4c7c7] text-base">
               The finest digital products, generated in seconds.
@@ -331,7 +331,7 @@ export default function Home() {
                 <span className="text-[#FF6A3D]">without boundaries?</span>
               </h2>
               <p className="font-['Geist'] text-neutral-400 text-lg">
-                Join thousands of developers creating the future of the web with Vibel AI.
+                Join thousands of developers creating the future of the web with SparkSite AI.
               </p>
               <div className="pt-4 flex justify-center">
                 <button
@@ -350,10 +350,21 @@ export default function Home() {
         <footer className="border-t border-neutral-200 dark:border-[#444748]/30 py-12 text-center text-xs font-mono text-neutral-500 dark:text-[#8e9192]">
           <div className="max-w-[1440px] mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="Vibel Logo" width={20} height={20} className="brightness-110 dark:brightness-125" />
-              <span className="font-['Sora'] font-bold text-neutral-900 dark:text-[#e3e2e2]">Vibel AI Engine</span>
+              <Image src="/logo.svg" alt="SparkSite Logo" width={20} height={20} className="brightness-110 dark:brightness-125" />
+              <span className="font-['Sora'] font-bold text-neutral-900 dark:text-[#e3e2e2]">SparkSite AI Engine</span>
             </div>
-            <div>© {new Date().getFullYear()} Vibel Inc. All rights reserved.</div>
+            <div className="flex items-center gap-4">
+              <span>© {new Date().getFullYear()} SparkSite Inc. All rights reserved.</span>
+              <span>•</span>
+              <a
+                href="https://www.linkedin.com/in/vaibhavkumarprince/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#FF6A3D] text-[#090909] dark:text-[#e3e2e2] transition-colors underline underline-offset-4 flex items-center gap-1 font-semibold"
+              >
+                Made by Vaibhav
+              </a>
+            </div>
           </div>
         </footer>
       </main>

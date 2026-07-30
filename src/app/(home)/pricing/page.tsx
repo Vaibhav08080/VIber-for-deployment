@@ -18,7 +18,7 @@ const PricingPage = () => {
         <div className="flex flex-col items-center gap-3">
           <Image
             src="/logo.svg"
-            alt="Vibel Logo"
+            alt="SparkSite Logo"
             width={48}
             height={48}
             className="brightness-110 dark:brightness-125 hover:scale-105 transition-transform"

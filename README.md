@@ -1,11 +1,11 @@
-# Vibel
+# SparkSite
 
-**English** | [हिंदी नीचे](#वाइबेल---हिंदी)
+**English**
 
 ---
 
-## What is Vibel?
-Vibel is a modern web application that lets you create websites simply by chatting with AI. It combines the power of Next.js, Clerk authentication, and TRPC APIs to provide a seamless, interactive, and collaborative experience for building and managing projects.
+## What is SparkSite?
+SparkSite is a modern web application that lets you create websites simply by chatting with AI. It combines the power of Next.js, Clerk authentication, and TRPC APIs to provide a seamless, interactive, and collaborative experience for building and managing projects.
 
 ## Features
 - **AI-powered Website Creation:** Build websites by having a conversation with an AI assistant.

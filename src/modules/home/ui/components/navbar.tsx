@@ -22,9 +22,9 @@ export const Navbar = () => {
     <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[1440px] rounded-full z-50 glass-panel flex justify-between items-center px-6 md:px-8 py-3 border border-black/10 dark:border-[#444748]/30 shadow-2xl backdrop-blur-xl bg-white/80 dark:bg-[#121414]/70 transition-colors">
       {/* Brand Logo */}
       <Link href="/" className="flex items-center gap-3 group">
-        <Image src="/logo.svg" alt="Vibel Logo" width={28} height={28} className="brightness-110 dark:brightness-125 group-hover:scale-105 transition-transform" />
+        <Image src="/logo.svg" alt="SparkSite Logo" width={28} height={28} className="brightness-110 dark:brightness-125 group-hover:scale-105 transition-transform" />
         <span className="font-['Sora'] text-xl md:text-[24px] tracking-tighter text-[#090909] dark:text-[#e3e2e2] font-bold">
-          Vibel
+          SparkSite
         </span>
       </Link>
 
@@ -58,6 +58,14 @@ export const Navbar = () => {
         >
           Pricing
         </Link>
+        <a
+          href="https://www.linkedin.com/in/vaibhavkumarprince/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs uppercase tracking-widest text-[#FF6A3D] hover:underline font-semibold transition-all"
+        >
+          Made by Vaibhav
+        </a>
       </div>
 
       {/* Actions & Auth */}

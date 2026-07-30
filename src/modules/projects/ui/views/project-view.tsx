@@ -98,7 +98,7 @@ export const ProjectView = ({ projectId }: Props) => {
               <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
                 <div className="size-16 rounded-2xl bg-muted flex items-center justify-center text-3xl">🖥️</div>
                 <p className="text-sm font-medium">No preview yet</p>
-                <p className="text-xs">Ask Vibel to build something and the preview will appear here</p>
+                <p className="text-xs">Ask SparkSite to build something and the preview will appear here</p>
               </div>
             )}
             </TabsContent>

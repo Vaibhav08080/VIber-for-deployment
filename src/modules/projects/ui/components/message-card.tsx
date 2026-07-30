@@ -85,8 +85,8 @@ const AssistantMessage =({
             type ==="ERROR" && "text-red-700 dark:text-red-500"
         )}>
             <div className="flex items-center gap-2 pl-2 mb-2">
-                <Image src="/logo.svg" alt="Vibel" width={18} height={18} className="shrink-0"/>
-                <span className="text-sm font-medium">Vibel</span>
+                <Image src="/logo.svg" alt="SparkSite" width={18} height={18} className="shrink-0"/>
+                <span className="text-sm font-medium">SparkSite</span>
                 <span className="text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
                     {format(CreatedAt, "HH:mm 'on' MMM dd, yyyy")}
                 </span>

@@ -17,29 +17,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vibel",
-  description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using Vibel.",
+  metadataBase: new URL("https://sparksite.dev"),
+  title: "SparkSite",
+  description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using SparkSite.",
   keywords: [
     "AI website builder",
     "AI web app generator",
     "prompt to website",
     "Next.js app builder",
-    "Vibel",
+    "SparkSite",
     "create website with AI",
     "no code website builder",
     "lovable websites"
   ],
   openGraph: {
-    title: "Vibel | AI Website Builder",
-    description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using Vibel.",
-    url: "https://vibel.app/",
-    siteName: "Vibel",
+    title: "SparkSite | AI Website Builder",
+    description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using SparkSite.",
+    url: "https://sparksite.dev/",
+    siteName: "SparkSite",
     images: [
       {
         url: "/logo.svg",
         width: 1200,
         height: 630,
-        alt: "Vibel Logo"
+        alt: "SparkSite Logo"
       }
     ],
     locale: "en_US",
@@ -47,13 +48,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vibel | AI Website Builder",
-    description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using Vibel.",
+    title: "SparkSite | AI Website Builder",
+    description: "Create websites by chatting with AI prompts. Instantly generate lovable, modern web apps using SparkSite.",
     images: ["/logo.svg"],
     creator: "@yourtwitterhandle"
   },
   alternates: {
-    canonical: "https://vibel.app/"
+    canonical: "https://sparksite.dev/"
   }
 };
 
