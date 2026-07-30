@@ -25,7 +25,7 @@ import {
   RocketIcon,
 } from "lucide-react";
 
-import { useClerk } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 
 interface Props {
   projectId: string;
@@ -38,6 +38,8 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const clerk = useClerk();
+  const { user } = useUser();
+  const [isLinking, setIsLinking] = useState(false);
 
   const sanitizedDefaultRepoName = projectName
     .toLowerCase()
@@ -52,6 +54,29 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
     ...trpc.github.getStatus.queryOptions({ projectId }),
     enabled: isOpen,
   });
+
+  const handleConnectGitHub = async () => {
+    if (!user) {
+      clerk.openSignIn();
+      return;
+    }
+    setIsLinking(true);
+    try {
+      const res = await user.createExternalAccount({
+        strategy: "oauth_github",
+        redirectUrl: window.location.href,
+      });
+      if (res.verification?.externalVerificationRedirectURL) {
+        window.location.href = res.verification.externalVerificationRedirectURL.href;
+      } else {
+        setIsLinking(false);
+      }
+    } catch (err: any) {
+      setIsLinking(false);
+      const msg = err?.errors?.[0]?.message || "Could not connect GitHub.";
+      toast.error(msg);
+    }
+  };
 
   const exportMutation = useMutation(
     trpc.github.exportRepo.mutationOptions({
@@ -113,27 +138,47 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
           </div>
         ) : !isConnected ? (
           /* GitHub Not Connected Alert */
-          <div className="flex flex-col gap-4 py-3">
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col gap-2">
+          <div className="flex flex-col gap-3 py-2">
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col gap-2">
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-medium text-sm">
-                <ShieldCheckIcon className="size-4" />
-                <span>GitHub Account Not Linked</span>
+                <ShieldCheckIcon className="size-4 shrink-0" />
+                <span>GitHub Account Not Connected</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                To export repositories to your personal GitHub account, please make sure you connect your GitHub account in your Clerk profile settings.
+                Connect your GitHub account to enable automatic repository creation, code export, and 1-click Vercel deployments.
               </p>
             </div>
+
+            {/* Direct GitHub OAuth Link Button */}
+            <Button
+              variant="default"
+              disabled={isLinking}
+              className="w-full gap-2 bg-[#24292e] hover:bg-[#1b1f23] text-white h-10 text-xs font-semibold shadow-sm"
+              onClick={handleConnectGitHub}
+            >
+              {isLinking ? (
+                <Loader2Icon className="size-4 animate-spin" />
+              ) : (
+                <GithubIcon className="size-4" />
+              )}
+              <span>Connect GitHub Account</span>
+            </Button>
+
             <Button
               variant="outline"
-              className="w-full gap-2 border-border hover:bg-muted"
+              className="w-full gap-2 text-xs border-border hover:bg-muted text-muted-foreground"
               onClick={() => {
                 onClose();
                 clerk.openUserProfile();
               }}
             >
-              <GithubIcon className="size-4" />
-              <span>Link GitHub Account via Profile</span>
+              <span>Manage Connected Accounts</span>
             </Button>
+
+            <div className="p-3 rounded-lg border border-border bg-muted/30 text-[11px] text-muted-foreground flex flex-col gap-1">
+              <span className="font-semibold text-foreground">💡 Setup Note (Clerk Dashboard):</span>
+              <span>If GitHub isn&apos;t listed, enable GitHub under <strong>Clerk Dashboard → Social Connections → GitHub</strong> and check the <code>repo</code> scope.</span>
+            </div>
           </div>
         ) : (
           /* Connected View */
