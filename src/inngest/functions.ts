@@ -12,6 +12,33 @@ interface AgentState{
   files:{[path: string]: string};
 }
 
+async function updateProgress(projectId: string, stepName: string, status: "RUNNING" | "DONE" | "ERROR" = "RUNNING") {
+  if (status === "RUNNING") {
+    await prisma.progressStep.create({
+      data: { projectId, step: stepName, status: "RUNNING" },
+    });
+  } else {
+    await prisma.progressStep.updateMany({
+      where: { projectId, step: stepName, status: "RUNNING" },
+      data: { status },
+    });
+  }
+}
+
+async function completeProgress(projectId: string, stepName: string) {
+  await prisma.progressStep.updateMany({
+    where: { projectId, step: stepName, status: "RUNNING" },
+    data: { status: "DONE" },
+  });
+}
+
+async function cleanupProgress(projectId: string) {
+  await prisma.progressStep.updateMany({
+    where: { projectId, status: "RUNNING" },
+    data: { status: "DONE" },
+  });
+}
+
 export const CodeAgentFunction = inngest.createFunction(
   { id: "code-agent" },
   { event: "code-agent/run" },
@@ -86,14 +113,19 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
       };
     }
 
+    // --- Progress: Setting up sandbox ---
     const SandboxId = await step.run("get-sandbox-id", async () => {
+      await updateProgress(event.data.projectId, "Setting up sandbox...");
       const sandbox = await Sandbox.create("viber-nextjs", {
-        timeoutMs: 60 * 60 * 1000, // 1 hour (Pro plan supports up to 24h)
+        timeoutMs: 60 * 60 * 1000,
       });
+      await completeProgress(event.data.projectId, "Setting up sandbox...");
       return sandbox.sandboxId;
     });
 
+ // --- Progress: Loading conversation ---
  const previousMessages = await step.run("get-previous-messages", async () => {
+  await updateProgress(event.data.projectId, "Loading conversation history...");
   const formattedMessages:Message[] = [];
     const messages = await prisma.message.findMany({
       where:{
@@ -121,6 +153,7 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
         });
       }
     }
+    await completeProgress(event.data.projectId, "Loading conversation history...");
     return formattedMessages;
  })  
  const State = createState<AgentState>({
@@ -258,7 +291,16 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
       }
     });
 
+    // --- Progress: AI coding ---
+    await step.run("progress-ai-coding", async () => {
+      await updateProgress(event.data.projectId, "AI is writing your code...");
+    });
+
     const result = await network.run(event.data.value ,{ state: State});
+
+    await step.run("progress-ai-coding-done", async () => {
+      await completeProgress(event.data.projectId, "AI is writing your code...");
+    });
 
     const fragmentTitleGenerator = createAgent({
       name: "fragment-title-generator",
@@ -282,8 +324,17 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
         }
       }),
     });
+    // --- Progress: Generating title ---
+    await step.run("progress-generating-title", async () => {
+      await updateProgress(event.data.projectId, "Generating app title...");
+    });
+
     const {output : fragmentTitleOutput} = await fragmentTitleGenerator.run(result.state.data.summary);
     const {output : responseOutput} = await responseGenerator.run(result.state.data.summary);
+
+    await step.run("progress-generating-title-done", async () => {
+      await completeProgress(event.data.projectId, "Generating app title...");
+    });
 
 
     const generateFragmentTitle = () =>{
@@ -316,16 +367,21 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
      !result.state.data.summary ||
      Object.keys(result.state.data.files || {}).length === 0;
 
+    // --- Progress: Building preview ---
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
+      await updateProgress(event.data.projectId, "Building your app preview...");
       const sandbox = await getSandbox(SandboxId);
       const host = sandbox.getHost(3000);
+      await completeProgress(event.data.projectId, "Building your app preview...");
       return `https://${host}`;
     });
 
+    // --- Progress: Saving results ---
     await step.run("save-results" , async () =>{
+      await updateProgress(event.data.projectId, "Saving results...");
 
       if (isError) {
-        return await prisma.message.create({
+        const msg = await prisma.message.create({
           data: {
             projectId: event.data.projectId,
             content: "Something went wrong, please try again",
@@ -333,8 +389,10 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             type: "ERROR",
           }
         });
+        await cleanupProgress(event.data.projectId);
+        return msg;
       }
-      return await prisma.message.create({
+      const msg = await prisma.message.create({
         data:{
           projectId: event.data.projectId,
           content: generateResponse(),
@@ -348,7 +406,9 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             }
           }
         }
-      })
+      });
+      await cleanupProgress(event.data.projectId);
+      return msg;
     })
 
     return {

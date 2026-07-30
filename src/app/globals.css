@@ -145,3 +145,42 @@
 .parallax-hero {
   transition: transform 0.2s cubic-bezier(0.1, 0, 0.1, 1);
 }
+
+/* Progress tracker animations */
+@keyframes progress-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes progress-slide-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes progress-pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes progress-bar-fill {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-progress-spin {
+  animation: progress-spin 1s linear infinite;
+}
+
+.animate-progress-slide-in {
+  animation: progress-slide-in 0.4s ease-out forwards;
+}
+
+.animate-progress-pulse {
+  animation: progress-pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-progress-bar {
+  background: linear-gradient(90deg, var(--primary) 0%, #ff9a76 50%, var(--primary) 100%);
+  background-size: 200% 100%;
+  animation: progress-bar-fill 2s ease-in-out infinite;
+}
