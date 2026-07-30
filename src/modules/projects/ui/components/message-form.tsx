@@ -36,6 +36,7 @@ export const MessageForm = ({ projectId }: Props) => {
     const queryClient = useQueryClient();
     const { user } = useUser();
     const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+    const [mode, setMode] = useState<"BUILD" | "DISCUSS">("BUILD");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { data: usage } = useQuery({
@@ -118,6 +119,7 @@ export const MessageForm = ({ projectId }: Props) => {
             value: values.value,
             projectId,
             imageUrl: imageDataUrl || undefined,
+            mode,
         });
     };
 
@@ -168,7 +170,7 @@ export const MessageForm = ({ projectId }: Props) => {
                             minRows={2}
                             maxRows={8}
                             className="pt-4 resize-none border-none w-full outline-none bg-transparent"
-                            placeholder="What would you like to build? Ask or attach a screenshot..."
+                            placeholder={mode === "DISCUSS" ? "Ask questions or discuss app ideas (No code changes)..." : "What would you like to build? Ask or attach a screenshot..."}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                                     e.preventDefault();
@@ -199,8 +201,43 @@ export const MessageForm = ({ projectId }: Props) => {
                 )}
 
                 <div className="flex gap-x-2 items-end justify-between pt-2">
-                    {/* Left: Paperclip + Voice + Enhance button + keyboard hint */}
-                    <div className="flex items-center gap-x-2">
+                    {/* Left: Mode Switch + Paperclip + Voice + Enhance button + keyboard hint */}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        {/* Mode Selector Toggle */}
+                        <div className="flex items-center bg-muted/60 p-0.5 rounded-lg border border-border">
+                            <Hint text="Build mode: Generates code & app versions" side="top">
+                                <button
+                                    type="button"
+                                    disabled={isPending || isEnhancing}
+                                    onClick={() => setMode("BUILD")}
+                                    className={cn(
+                                        "px-2 py-0.5 rounded-md text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
+                                        mode === "BUILD"
+                                            ? "bg-background text-foreground shadow-xs font-semibold"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <span>🏗️</span>
+                                    <span className="hidden sm:inline">Build</span>
+                                </button>
+                            </Hint>
+                            <Hint text="Discuss mode: Ask questions without making code changes" side="top">
+                                <button
+                                    type="button"
+                                    disabled={isPending || isEnhancing}
+                                    onClick={() => setMode("DISCUSS")}
+                                    className={cn(
+                                        "px-2 py-0.5 rounded-md text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
+                                        mode === "DISCUSS"
+                                            ? "bg-background text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <span>💬</span>
+                                    <span className="hidden sm:inline">Discuss</span>
+                                </button>
+                            </Hint>
+                        </div>
                         <Hint text="Attach image or screenshot 📎" side="top">
                             <Button
                                 type="button"

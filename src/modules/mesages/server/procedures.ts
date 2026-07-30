@@ -39,6 +39,7 @@ export const messagesRouter = createTRPCRouter({
                     .max(10000, { message: "Value is too long" }),
                 projectId: z.string().min(1, { message: "Project ID is required" }),
                 imageUrl: z.string().optional(),
+                mode: z.enum(["BUILD", "DISCUSS"]).default("BUILD"),
             })
         )
         .mutation(async ({ input ,ctx }) => {
@@ -78,7 +79,8 @@ export const messagesRouter = createTRPCRouter({
                     content: input.value,
                     imageUrl: input.imageUrl,
                     role: "USER",
-                    type: "RESULT"
+                    type: "RESULT",
+                    mode: input.mode,
                 }
             });
 
@@ -86,7 +88,8 @@ export const messagesRouter = createTRPCRouter({
                 name: "code-agent/run",
                     data: {
                       value: input.value,
-                      projectId: input.projectId
+                      projectId: input.projectId,
+                      mode: input.mode,
                     },
 
                 });

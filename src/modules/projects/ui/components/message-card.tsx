@@ -1,18 +1,25 @@
-import { MessageRole, Fragment, MessageType } from "@prisma/client";
+import { MessageRole, Fragment, MessageType, MessageMode } from "@prisma/client";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Image from "next/image";
-import { Code2Icon, ChevronRightIcon, CheckCircle2Icon, HistoryIcon } from "lucide-react";
+import { Code2Icon, ChevronRightIcon, CheckCircle2Icon, HistoryIcon, MessageSquareIcon } from "lucide-react";
 
 interface UserMessageProps{
     content:string;
     imageUrl?: string | null;
+    mode?: MessageMode;
 }
 
-const UserMessage = ({content, imageUrl}:UserMessageProps)=>{
+const UserMessage = ({content, imageUrl, mode}:UserMessageProps)=>{
     return(
-        <div className="flex justify-end pb-4 pr-2 pl-10">
+        <div className="flex flex-col items-end pb-4 pr-2 pl-10 gap-1">
+            {mode === "DISCUSS" && (
+                <div className="flex items-center gap-1 text-[10px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
+                    <MessageSquareIcon className="size-3" />
+                    <span>Discuss Mode</span>
+                </div>
+            )}
             <Card className="rounded-lg bg-muted dark:bg-zinc-800 p-3 shadow-none border-none max-w-[80%] break-words flex flex-col gap-2">
                 {imageUrl && (
                     <img
@@ -121,6 +128,7 @@ const AssistantMessage =({
 interface MessageCardProps{
     content:string;
     imageUrl?: string | null;
+    mode?: MessageMode;
     role:MessageRole;
     fragment: Fragment | null;
     CreatedAt:Date;
@@ -132,6 +140,7 @@ interface MessageCardProps{
 export const MessageCard=({
     content,
     imageUrl,
+    mode,
     role,
     fragment,
     CreatedAt,
@@ -151,6 +160,6 @@ export const MessageCard=({
             />
         )
     return(
-        <UserMessage content={content} imageUrl={imageUrl}/>
+        <UserMessage content={content} imageUrl={imageUrl} mode={mode}/>
     )
 }

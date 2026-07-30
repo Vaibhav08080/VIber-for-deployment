@@ -31,6 +31,7 @@ export const ProjectForm = () => {
   const clerk = useClerk();
   const queryClient = useQueryClient();
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
+  const [mode, setMode] = useState<"BUILD" | "DISCUSS">("BUILD");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -108,6 +109,7 @@ export const ProjectForm = () => {
     await CreateProject.mutateAsync({
       value: values.value,
       imageUrl: imageDataUrl || undefined,
+      mode,
     });
   };
 
@@ -203,7 +205,41 @@ export const ProjectForm = () => {
 
             {/* Action Buttons Toolbar */}
             <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 p-2 w-full md:w-auto border-t md:border-t-0 md:border-l border-black/10 dark:border-[#444748]/30">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                {/* Mode Selector Toggle */}
+                <div className="flex items-center bg-neutral-100 dark:bg-[#1a1c1c] p-0.5 rounded-xl border border-black/5 dark:border-white/5 mr-1">
+                  <button
+                    type="button"
+                    disabled={isPending || isEnhancing}
+                    onClick={() => setMode("BUILD")}
+                    title="Build mode: Generates app & code"
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
+                      mode === "BUILD"
+                        ? "bg-white dark:bg-[#292a2a] text-[#090909] dark:text-[#e3e2e2] shadow-xs font-semibold"
+                        : "text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    )}
+                  >
+                    <span>🏗️</span>
+                    <span className="hidden sm:inline">Build</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isPending || isEnhancing}
+                    onClick={() => setMode("DISCUSS")}
+                    title="Discuss mode: Q&A & design discussions without generating code"
+                    className={cn(
+                      "px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
+                      mode === "DISCUSS"
+                        ? "bg-white dark:bg-[#292a2a] text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+                        : "text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                    )}
+                  >
+                    <span>💬</span>
+                    <span className="hidden sm:inline">Discuss</span>
+                  </button>
+                </div>
+
                 {/* Image Attach Button */}
                 <button
                   type="button"

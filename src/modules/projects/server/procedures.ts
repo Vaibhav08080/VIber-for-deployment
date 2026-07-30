@@ -52,6 +52,7 @@ export const projectsRouter = createTRPCRouter({
                 .min(1, { message: "Value is required" })
                 .max(10000, { message: "Value is too long" }),
                 imageUrl: z.string().optional(),
+                mode: z.enum(["BUILD", "DISCUSS"]).default("BUILD"),
             })
         )
         .mutation(async ({ input ,ctx }) => {
@@ -79,7 +80,8 @@ export const projectsRouter = createTRPCRouter({
                             content: input.value,
                             imageUrl: input.imageUrl,
                             role: "USER",
-                            type: "RESULT"
+                            type: "RESULT",
+                            mode: input.mode,
                         }
                     }
 
@@ -94,6 +96,7 @@ export const projectsRouter = createTRPCRouter({
                     data: {
                       value: input.value,
                       projectId: CreatedProject.id,
+                      mode: input.mode,
                     },
 
                 });

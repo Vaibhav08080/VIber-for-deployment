@@ -5,8 +5,7 @@ import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
 import { prisma } from "@/lib/db";
-
-
+import OpenAI from "openai";
 
 interface AgentState{
   summary: string;
@@ -17,6 +16,75 @@ export const CodeAgentFunction = inngest.createFunction(
   { id: "code-agent" },
   { event: "code-agent/run" },
   async ({ event, step }) => {
+
+    if (event.data.mode === "DISCUSS") {
+      const content = await step.run("generate-discuss-response", async () => {
+        const messages = await prisma.message.findMany({
+          where: { projectId: event.data.projectId },
+          orderBy: { createdAt: "asc" },
+        });
+
+        const formattedMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+          {
+            role: "system",
+            content: `You are an expert AI software architect and senior product designer for an AI web app builder.
+The user is in DISCUSS mode. They want to ask questions, discuss design ideas, plan features, or troubleshoot without modifying any code files or sandboxes right now.
+Provide clear, structured, technical, and helpful answers. Use bullet points and code snippets where helpful. Keep your response focused on answering their question directly.`,
+          },
+        ];
+
+        for (const message of messages) {
+          if (message.role === "ASSISTANT") {
+            formattedMessages.push({
+              role: "assistant",
+              content: message.content,
+            });
+          } else {
+            if (message.imageUrl) {
+              formattedMessages.push({
+                role: "user",
+                content: [
+                  { type: "text", text: message.content },
+                  { type: "image_url", image_url: { url: message.imageUrl } },
+                ],
+              });
+            } else {
+              formattedMessages.push({
+                role: "user",
+                content: message.content,
+              });
+            }
+          }
+        }
+
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const response = await client.chat.completions.create({
+          model: "gpt-4o",
+          messages: formattedMessages,
+          temperature: 0.7,
+          max_tokens: 2000,
+        });
+
+        return response.choices[0]?.message?.content || "Here is my advice on your project.";
+      });
+
+      await step.run("save-discuss-message", async () => {
+        return await prisma.message.create({
+          data: {
+            projectId: event.data.projectId,
+            content: content,
+            role: "ASSISTANT",
+            type: "RESULT",
+            mode: "DISCUSS",
+          },
+        });
+      });
+
+      return {
+        summary: content,
+        mode: "DISCUSS",
+      };
+    }
 
     const SandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("viber-nextjs", {
