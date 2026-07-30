@@ -109,9 +109,9 @@ export const GitHubExportModal = ({ projectId, projectName, isOpen, onClose }: P
   const existingRepoUrl = status?.projectGithubUrl;
   const existingRepoName = status?.projectGithubRepo;
 
-  // Generate Vercel 1-click deploy URL
+  // Generate Vercel 1-click deploy URL (Direct Import, no duplicate repo)
   const vercelDeployUrl = existingRepoUrl
-    ? `https://vercel.com/new/clone?repository-url=${encodeURIComponent(existingRepoUrl)}`
+    ? `https://vercel.com/new/import?s=${encodeURIComponent(existingRepoUrl)}`
     : null;
 
   return (
