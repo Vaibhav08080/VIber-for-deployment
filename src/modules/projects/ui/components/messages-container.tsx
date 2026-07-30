@@ -4,7 +4,7 @@ import { MessageCard } from "./message-card";
 import { MessageForm } from "./message-form";
 import { useEffect, useRef } from "react";
 import { Fragment } from "@prisma/client";
-import { MessageLoading } from "./message-loading";
+
 interface Props{
     projectId:string;
     activeFragment:Fragment | null;
@@ -13,24 +13,27 @@ interface Props{
 export const MessagesContainer = ({projectId , activeFragment , SetActiveFragment}:Props) => {
     const BottomRef = useRef<HTMLDivElement>(null)
     const trpc = useTRPC()
-    const {data:messages} = useSuspenseQuery(trpc.messages.getMany.queryOptions({
-        projectId,
-        
-
-    }
-)
-    );
+    const {data:messages} = useSuspenseQuery({
+        ...trpc.messages.getMany.queryOptions({ projectId }),
+        refetchInterval: (query) => {
+            const msgs = query.state.data;
+            if (!msgs || msgs.length === 0) return false;
+            const last = msgs[msgs.length - 1];
+            // Poll every 3s while waiting for AI response
+            return last.role === "USER" ? 3000 : false;
+        },
+    });
 
 
     useEffect(() => {
-    // Only auto-select last assistant fragment if nothing is selected
-    if (!activeFragment) {
-        const lastAssistantMessage = messages.findLast((message) => message.role === "ASSISTANT" && message.fragment);
-        if (lastAssistantMessage?.fragment) {
+    // Always auto-select the LATEST assistant fragment
+    const lastAssistantMessage = messages.findLast((message) => message.role === "ASSISTANT" && message.fragment);
+    if (lastAssistantMessage?.fragment) {
+        if (!activeFragment || activeFragment.id !== lastAssistantMessage.fragment.id) {
             SetActiveFragment(lastAssistantMessage.fragment);
         }
     }
-}, [messages, activeFragment, SetActiveFragment]);
+}, [messages]);
 
     useEffect(()=>{
         BottomRef.current?.scrollIntoView()
@@ -60,7 +63,12 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
                             
                         />
                     ))}
-                    {isLastMessageUser && <MessageLoading projectId={projectId}/>}
+                    {isLastMessageUser && (
+                        <div className="flex items-center gap-2 px-4 pb-4">
+                            <div className="size-2 rounded-full bg-[var(--primary)] animate-pulse" />
+                            <span className="text-sm text-muted-foreground animate-pulse">SparkSite is working...</span>
+                        </div>
+                    )}
 
                     <div ref={BottomRef}/>
                 </div>

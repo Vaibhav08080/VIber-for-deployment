@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Fragment } from "@prisma/client";
 import { ProjectHeader } from "../components/project-header";
 import { FragmentWeb } from "../components/fragment-web";
+import { MessageLoading } from "../components/message-loading";
 import { EyeIcon , CodeIcon, CrownIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,11 +22,28 @@ import Link from "next/link";
 import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
 import { useAuth } from "@clerk/nextjs";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
+
 export const ProjectView = ({ projectId }: Props) => {
      const {has} =useAuth();
       const hasProAccess = has?.({plan:"pro"});
   const [activeFragment, SetActiveFragment] = useState<Fragment | null>(null);
   const [tabstate, setTabstate] = useState<"preview" | "code">("preview");
+  const trpc = useTRPC();
+
+  const { data: messages } = useSuspenseQuery({
+    ...trpc.messages.getMany.queryOptions({ projectId }),
+    refetchInterval: (query) => {
+      const msgs = query.state.data;
+      if (!msgs || msgs.length === 0) return false;
+      const last = msgs[msgs.length - 1];
+      return last.role === "USER" ? 3000 : false;
+    },
+  });
+
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+  const isWaitingForAI = lastMessage?.role === "USER";
 
   return (
     <div className="h-screen">
@@ -92,7 +110,11 @@ export const ProjectView = ({ projectId }: Props) => {
              
             </div>
             <TabsContent value="preview" className="h-full">
-            {!!activeFragment ? (
+            {isWaitingForAI ? (
+              <div className="h-full flex flex-col items-center justify-center p-6">
+                <MessageLoading projectId={projectId} />
+              </div>
+            ) : !!activeFragment ? (
               <FragmentWeb data={activeFragment} />
             ) : (
               <div className="h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">

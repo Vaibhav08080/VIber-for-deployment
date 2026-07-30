@@ -89,8 +89,53 @@ export const projectsRouter = createTRPCRouter({
 
             })
 
-           
+            // DISCUSS mode: instant OpenAI response, no Inngest
+            if (input.mode === "DISCUSS") {
+                const formattedMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+                    {
+                        role: "system",
+                        content: `You are an expert AI software architect and senior product designer for an AI web app builder.
+The user is in DISCUSS mode. They want to ask questions, discuss design ideas, plan features, or troubleshoot without modifying any code files or sandboxes right now.
+Provide clear, structured, technical, and helpful answers. Use bullet points and code snippets where helpful. Keep your response focused on answering their question directly.`,
+                    },
+                ];
 
+                if (input.imageUrl) {
+                    formattedMessages.push({
+                        role: "user",
+                        content: [
+                            { type: "text", text: input.value },
+                            { type: "image_url", image_url: { url: input.imageUrl } },
+                        ],
+                    });
+                } else {
+                    formattedMessages.push({ role: "user", content: input.value });
+                }
+
+                const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                const response = await client.chat.completions.create({
+                    model: "gpt-4o",
+                    messages: formattedMessages,
+                    temperature: 0.7,
+                    max_tokens: 2000,
+                });
+
+                const aiContent = response.choices[0]?.message?.content || "Here is my advice on your project.";
+
+                await prisma.message.create({
+                    data: {
+                        projectId: CreatedProject.id,
+                        content: aiContent,
+                        role: "ASSISTANT",
+                        type: "RESULT",
+                        mode: "DISCUSS",
+                    },
+                });
+
+                return CreatedProject;
+            }
+
+            // BUILD mode: trigger Inngest for code generation
             await inngest.send({
                 name: "code-agent/run",
                     data: {
