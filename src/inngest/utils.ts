@@ -117,13 +117,22 @@ export async function autoInstallMissingPackages(
     }
   }
 
+  const packagesToInstall: string[] = [];
+
   for (const pkg of Array.from(detectedImports)) {
-    try {
-      const installCmd = knownPackageMap[pkg];
-      await sandbox.commands.run(`npm install ${installCmd} --yes`);
+    const installCmd = knownPackageMap[pkg];
+    if (installCmd) {
+      packagesToInstall.push(installCmd);
       installedPackages.push(pkg);
+    }
+  }
+
+  if (packagesToInstall.length > 0) {
+    try {
+      const combinedCmd = `npm install ${packagesToInstall.join(" ")} --yes`;
+      await sandbox.commands.run(combinedCmd);
     } catch (err) {
-      console.warn(`Auto-install warning for ${pkg}:`, err);
+      console.warn("Auto-install warning:", err);
     }
   }
 

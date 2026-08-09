@@ -126,17 +126,20 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
     });
 
  // --- Progress: Loading conversation ---
- const previousMessages = await step.run("get-previous-messages", async () => {
-  await updateProgress(event.data.projectId, "Loading conversation history...");
-  const formattedMessages:Message[] = [];
+  const previousMessages = await step.run("get-previous-messages", async () => {
+    await updateProgress(event.data.projectId, "Loading conversation history...");
+    const formattedMessages: Message[] = [];
     const messages = await prisma.message.findMany({
-      where:{
+      where: {
         projectId: event.data.projectId,
       },
-      orderBy:{
-        createdAt:"asc",   // desc to asc
+      orderBy: {
+        createdAt: "desc",
       },
-    })
+      take: 10,
+    });
+    messages.reverse();
+
     for (const message of messages) {
       if (message.imageUrl) {
         formattedMessages.push({
@@ -157,24 +160,28 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
     }
     await completeProgress(event.data.projectId, "Loading conversation history...");
     return formattedMessages;
- })  
- const State = createState<AgentState>({
-    summary: "",
-    files: {},
- },{
-  messages: previousMessages,
- }
-)
-    const projectDb = await step.run("get-project-details", async () => {
-      return await prisma.project.findUnique({
-        where: { id: event.data.projectId },
-        select: { supabaseUrl: true, supabaseAnonKey: true },
-      });
-    });
+  });
 
-    let systemPrompt = PROMPT;
-    if (projectDb?.supabaseUrl && projectDb?.supabaseAnonKey) {
-      systemPrompt += `\n\nSUPABASE DATABASE CONNECTED:
+  const State = createState<AgentState>(
+    {
+      summary: "",
+      files: {},
+    },
+    {
+      messages: previousMessages,
+    }
+  );
+
+  const projectDb = await step.run("get-project-details", async () => {
+    return await prisma.project.findUnique({
+      where: { id: event.data.projectId },
+      select: { supabaseUrl: true, supabaseAnonKey: true },
+    });
+  });
+
+  let systemPrompt = PROMPT;
+  if (projectDb?.supabaseUrl && projectDb?.supabaseAnonKey) {
+    systemPrompt += `\n\nSUPABASE DATABASE CONNECTED:
 This project is connected to the user's live Supabase instance:
 - Supabase URL: "${projectDb.supabaseUrl}"
 - Supabase Anon Key: "${projectDb.supabaseAnonKey}"
@@ -187,18 +194,18 @@ You MUST:
 3. Use real Supabase client queries (e.g., supabase.from('items').select('*')) for backend/data logic.
 4. Provide a "supabase/schema.sql" file containing the SQL DDL statements (CREATE TABLE, RLS policies) for setting up the user's Supabase tables.
 `;
-    }
+  }
 
-    const codeAgent = createAgent<AgentState>({
-      name: "code-agent",
-      description: "An expert coding agent",
-      system: systemPrompt,
-      model: openai({
-        model: "gpt-4.1",
-        defaultParameters: {
-          temperature: 0.1,
-        }
-      }),
+  const codeAgent = createAgent<AgentState>({
+    name: "code-agent",
+    description: "An expert coding agent",
+    system: systemPrompt,
+    model: openai({
+      model: "gpt-4o",
+      defaultParameters: {
+        temperature: 0.1,
+      },
+    }),
       tools: [
 
         // ✅ FIXED terminal tool
@@ -254,10 +261,12 @@ You MUST:
                 }
                 const sanitizedMap = sanitizeClientComponents(rawFileMap);
 
-                for (const [filePath, content] of Object.entries(sanitizedMap)) {
-                  await sandbox.files.write(filePath, content);
-                  updatedFiles[filePath] = content;
-                }
+                await Promise.all(
+                  Object.entries(sanitizedMap).map(async ([filePath, content]) => {
+                    await sandbox.files.write(filePath, content);
+                    updatedFiles[filePath] = content;
+                  })
+                );
                 return updatedFiles;
               } catch (error) {
                 return "Error:" + error;
