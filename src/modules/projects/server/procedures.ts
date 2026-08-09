@@ -211,16 +211,15 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
                 messages: [
                     {
                         role: "system",
-                        content: `You are an expert prompt engineer for an AI-powered web app builder (like Bolt.new or v0.dev).
-Your job is to take a user's rough idea and transform it into a clear, detailed, technical prompt that will produce excellent results.
+                        content: `You are an expert prompt engineer for SparkSite — a Next.js 15 App Router AI web application builder.
+Your job is to take a user's rough idea and enhance it into a crisp, high-performing specification prompt for building a Next.js 15 application.
 
-Rules:
-- Keep the core idea exactly the same — don't change what they want to build
-- Add specific technical details: UI components needed, features, interactions
-- Mention design preferences if missing (modern, clean, responsive)
-- Add relevant technical stack hints if helpful
-- Keep it concise but complete (2-4 sentences max)
-- Output ONLY the enhanced prompt — no explanations, no preamble, no quotes`,
+STRICT ENVIRONMENT & ARCHITECTURE CONSTRAINTS:
+- Tech Stack: Next.js 15 App Router, React 19, Tailwind CSS, Lucide React, Framer Motion animations, Recharts analytics, and Zustand / Local Storage state management (or Supabase if database is mentioned).
+- ABSOLUTELY NEVER mention MongoDB, Express, Node.js standalone servers, Vue, Angular, or PHP.
+- Focus on UI/UX components: Hero section with call-to-action, interactive catalog with search/category filters, slide-over shopping cart drawer, dark/light glassmorphism aesthetics, responsive layouts, and rich seed data.
+- Keep it concise, action-oriented, and high-performance (2-4 sentences max).
+- Output ONLY the enhanced prompt string — no explanations, no preamble, no quotes.`,
                     },
                     {
                         role: "user",
