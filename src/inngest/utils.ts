@@ -21,8 +21,9 @@ export function lastAssistantTextMessageContent(result: AgentResult) {
 }
 
 /**
- * Self-Healing QA: Auto-appends "use client"; to any Next.js React component file
- * that uses client-side hooks, browser APIs, or interactive event handlers.
+ * Self-Healing QA: 
+ * 1. Auto-fixes invalid imports (e.g. Zustand default imports, broken cn paths).
+ * 2. Auto-appends "use client"; to any Next.js React component file using hooks or event listeners.
  */
 export function sanitizeClientComponents(
   files: Record<string, string>
@@ -56,11 +57,27 @@ export function sanitizeClientComponents(
     "onKeyDown=",
   ];
 
-  for (const [path, content] of Object.entries(sanitized)) {
-    if (typeof content !== "string") continue;
+  for (const [path, fileContent] of Object.entries(sanitized)) {
+    if (typeof fileContent !== "string") continue;
 
-    // Only inspect TypeScript/React component files
-    if (path.endsWith(".tsx") || path.endsWith(".jsx")) {
+    let content = fileContent;
+
+    // --- Fix 1: Auto-fix invalid Zustand default import ---
+    // import create from 'zustand' -> import { create } from 'zustand'
+    content = content.replace(
+      /import\s+create\s+from\s+['"]zustand['"]/g,
+      'import { create } from "zustand"'
+    );
+
+    // --- Fix 2: Auto-fix broken cn utility import path ---
+    // "@/components/ui/utils" -> "@/lib/utils"
+    content = content.replace(
+      /from\s+['"]@\/components\/ui\/utils['"]/g,
+      'from "@/lib/utils"'
+    );
+
+    // --- Fix 3: Ensure client directive ---
+    if (path.endsWith(".tsx") || path.endsWith(".jsx") || path.endsWith(".ts")) {
       const trimmed = content.trim();
       const hasClientHeader =
         trimmed.startsWith('"use client"') ||
@@ -72,10 +89,12 @@ export function sanitizeClientComponents(
         );
 
         if (needsClientHeader) {
-          sanitized[path] = `"use client";\n\n${content}`;
+          content = `"use client";\n\n${content}`;
         }
       }
     }
+
+    sanitized[path] = content;
   }
 
   return sanitized;
