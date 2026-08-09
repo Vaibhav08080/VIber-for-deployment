@@ -23,7 +23,7 @@ export function lastAssistantTextMessageContent(result: AgentResult) {
 
 /**
  * Self-Healing QA Engine: 
- * 1. Auto-sanitizes broken relative/local image paths into HD Unsplash CDN URLs.
+ * 1. Auto-sanitizes broken relative/local image paths into HD Unsplash CDN URLs (both JSX attributes and JS object properties).
  * 2. Auto-fixes invalid imports (e.g. Zustand default imports, broken cn paths).
  * 3. Auto-appends "use client"; to any Next.js React component file using hooks or event listeners.
  */
@@ -78,12 +78,21 @@ export function sanitizeClientComponents(
       'from "@/lib/utils"'
     );
 
-    // --- Fix 3: Auto-Sanitize Broken Relative / Text Image URLs into Live HD Unsplash URLs ---
+    // --- Fix 3.1: Auto-Sanitize JSX attributes src="..." ---
     content = content.replace(
       /src=["'](?!\/\/|https?:\/\/|data:)([^"']+)["']/g,
       (match, rawSrc) => {
         const replacementUrl = getFallbackImageForContext(`${rawSrc} ${path}`, imgCounter++);
         return `src="${replacementUrl}"`;
+      }
+    );
+
+    // --- Fix 3.2: Auto-Sanitize JS Object Properties like image: "Diamond Ring", imageUrl: "/ring.jpg" ---
+    content = content.replace(
+      /(image|imageUrl|img|photo|thumbnail|cover|avatar|banner|url)\s*:\s*["'](?!\/\/|https?:\/\/|data:)([^"']+)["']/g,
+      (match, propKey, rawVal) => {
+        const replacementUrl = getFallbackImageForContext(`${rawVal} ${propKey} ${path}`, imgCounter++);
+        return `${propKey}: "${replacementUrl}"`;
       }
     );
 
