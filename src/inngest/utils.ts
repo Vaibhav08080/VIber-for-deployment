@@ -1,5 +1,6 @@
 import { Sandbox } from "@e2b/code-interpreter";
 import { AgentResult, TextMessage } from "@inngest/agent-kit";
+import { getFallbackImageForContext } from "@/lib/image-assets";
 
 export async function getSandbox(SandboxId: string) {
   const sandbox = await Sandbox.connect(SandboxId);
@@ -21,9 +22,10 @@ export function lastAssistantTextMessageContent(result: AgentResult) {
 }
 
 /**
- * Self-Healing QA: 
- * 1. Auto-fixes invalid imports (e.g. Zustand default imports, broken cn paths).
- * 2. Auto-appends "use client"; to any Next.js React component file using hooks or event listeners.
+ * Self-Healing QA Engine: 
+ * 1. Auto-sanitizes broken relative/local image paths into HD Unsplash CDN URLs.
+ * 2. Auto-fixes invalid imports (e.g. Zustand default imports, broken cn paths).
+ * 3. Auto-appends "use client"; to any Next.js React component file using hooks or event listeners.
  */
 export function sanitizeClientComponents(
   files: Record<string, string>
@@ -57,26 +59,35 @@ export function sanitizeClientComponents(
     "onKeyDown=",
   ];
 
+  let imgCounter = 0;
+
   for (const [path, fileContent] of Object.entries(sanitized)) {
     if (typeof fileContent !== "string") continue;
 
     let content = fileContent;
 
     // --- Fix 1: Auto-fix invalid Zustand default import ---
-    // import create from 'zustand' -> import { create } from 'zustand'
     content = content.replace(
       /import\s+create\s+from\s+['"]zustand['"]/g,
       'import { create } from "zustand"'
     );
 
     // --- Fix 2: Auto-fix broken cn utility import path ---
-    // "@/components/ui/utils" -> "@/lib/utils"
     content = content.replace(
       /from\s+['"]@\/components\/ui\/utils['"]/g,
       'from "@/lib/utils"'
     );
 
-    // --- Fix 3: Ensure client directive ---
+    // --- Fix 3: Auto-Sanitize Broken Relative / Text Image URLs into Live HD Unsplash URLs ---
+    content = content.replace(
+      /src=["'](?!\/\/|https?:\/\/|data:)([^"']+)["']/g,
+      (match, rawSrc) => {
+        const replacementUrl = getFallbackImageForContext(`${rawSrc} ${path}`, imgCounter++);
+        return `src="${replacementUrl}"`;
+      }
+    );
+
+    // --- Fix 4: Ensure client directive ---
     if (path.endsWith(".tsx") || path.endsWith(".jsx") || path.endsWith(".ts")) {
       const trimmed = content.trim();
       const hasClientHeader =
