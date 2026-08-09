@@ -21,6 +21,7 @@ import {
   UnlinkIcon,
   ShieldCheckIcon,
   ZapIcon,
+  RefreshCwIcon,
 } from "lucide-react";
 
 interface Props {
@@ -62,6 +63,16 @@ export const SupabaseModal = ({ projectId, projectName, isOpen, onClose }: Props
     },
   });
 
+  const syncSchemaMutation = useMutation({
+    ...trpc.supabase.syncSchema.mutationOptions(),
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to sync database schema.");
+    },
+  });
+
   const disconnectMutation = useMutation({
     ...trpc.supabase.disconnect.mutationOptions(),
     onSuccess: (data) => {
@@ -88,6 +99,10 @@ export const SupabaseModal = ({ projectId, projectName, isOpen, onClose }: Props
       supabaseUrl: url.trim(),
       supabaseAnonKey: anonKey.trim(),
     });
+  };
+
+  const handleSyncSchema = () => {
+    syncSchemaMutation.mutate({ projectId });
   };
 
   const handleDisconnect = () => {
@@ -147,7 +162,22 @@ export const SupabaseModal = ({ projectId, projectName, isOpen, onClose }: Props
               </ul>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-2 pt-2">
+              <Button
+                onClick={handleSyncSchema}
+                disabled={syncSchemaMutation.isPending}
+                className="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {syncSchemaMutation.isPending ? (
+                  <Loader2Icon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <RefreshCwIcon className="w-4 h-4" />
+                    Sync Database Schema
+                  </>
+                )}
+              </Button>
+
               <Button
                 variant="outline"
                 onClick={handleDisconnect}

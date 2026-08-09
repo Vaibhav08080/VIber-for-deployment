@@ -354,70 +354,53 @@ You MUST:
       await completeProgress(event.data.projectId, "Running QA diagnostics & auto-healing...");
     });
 
-    const fragmentTitleGenerator = createAgent({
-      name: "fragment-title-generator",
-      description: "Generates a title for a code fragment",
-      system: FRAGMENT_TITLE_PROMPT,
-      model: openai({
-        model: "gpt-4o",
-        defaultParameters: {
-          temperature: 0.1,
-        }
-      }),
-    });
-    const responseGenerator = createAgent({
-      name: "response-generator",
-      description: "Generates a title for a code fragment",
-      system: RESPONSE_PROMPT,
-      model: openai({
-        model: "gpt-4o",
-        defaultParameters: {
-          temperature: 0.1,
-        }
-      }),
-    });
-    // --- Progress: Generating title ---
+    // --- Progress: Generating title & response (Lightweight step, zero token bloat) ---
     await step.run("progress-generating-title", async () => {
       await updateProgress(event.data.projectId, "Generating app title...");
     });
 
-    const {output : fragmentTitleOutput} = await fragmentTitleGenerator.run(result.state.data.summary);
-    const {output : responseOutput} = await responseGenerator.run(result.state.data.summary);
+    const titleAndResponse = await step.run("generate-title-and-response", async () => {
+      try {
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        const res = await client.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `Generate a JSON object with:
+1. "title": Short 2-3 word title for the app (Title Case, no quotes)
+2. "response": Friendly 1-2 sentence message describing what was built.
+Return ONLY raw JSON with keys "title" and "response".`
+            },
+            {
+              role: "user",
+              content: event.data.value
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.2,
+          max_tokens: 150,
+        });
+
+        const parsed = JSON.parse(res.choices[0]?.message?.content || "{}");
+        return {
+          title: parsed.title || "Web Application",
+          response: parsed.response || "Here is your generated web application.",
+        };
+      } catch (err) {
+        return {
+          title: "Web Application",
+          response: "Here is your generated web application.",
+        };
+      }
+    });
 
     await step.run("progress-generating-title-done", async () => {
       await completeProgress(event.data.projectId, "Generating app title...");
     });
 
-
-    const generateFragmentTitle = () =>{
-      if(fragmentTitleOutput[0].type !== "text"){
-        return "Fragment"
-      }
-      if (Array.isArray(fragmentTitleOutput[0].content)){
-        return fragmentTitleOutput[0].content.map((txt)=>txt).join("")
-      }
-      else{
-        return fragmentTitleOutput[0].content
-      }
-
-      
-    }
-
-    const generateResponse = () =>{
-      if(responseOutput[0].type !== "text"){
-        return "Here you go"
-      }
-      if (Array.isArray(responseOutput[0].content)){
-        return responseOutput[0].content.map((txt)=>txt).join("")
-      }
-      else{
-        return responseOutput[0].content
-      }
-    }
-
-    const isError = 
-     !result.state.data.summary ||
-     Object.keys(result.state.data.files || {}).length === 0;
+    const fileCount = Object.keys(result.state.data.files || {}).length;
+    const isError = fileCount === 0;
 
     // --- Progress: Building preview ---
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
@@ -447,13 +430,13 @@ You MUST:
       const msg = await prisma.message.create({
         data:{
           projectId: event.data.projectId,
-          content: generateResponse(),
+          content: titleAndResponse.response,
           role: "ASSISTANT",
           type: "RESULT",
           fragment:{
             create:{
               sandboxUrl: sandboxUrl,
-              title:generateFragmentTitle(),
+              title: titleAndResponse.title,
               files: result.state.data.files,
             }
           }
@@ -497,7 +480,7 @@ You MUST:
 
     return {
       url: sandboxUrl,
-      title: generateFragmentTitle(),
+      title: titleAndResponse.title,
       files: result.state.data.files,
       summary: result.state.data.summary,
     };
