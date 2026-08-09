@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import OpenAI from "openai";
 import { pushFilesToGitHubRepo } from "@/lib/github";
 import { clerkClient } from "@clerk/nextjs/server";
+import { SHADCN_UI_FILES } from "@/lib/shadcn-suite";
 
 interface AgentState{
   summary: string;
@@ -180,15 +181,14 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
   });
 
   await step.run("hydrate-sandbox-files", async () => {
-    if (Object.keys(existingFiles).length > 0) {
-      const sandbox = await getSandbox(SandboxId);
-      const sanitized = sanitizeClientComponents(existingFiles);
-      await Promise.all(
-        Object.entries(sanitized).map(async ([path, content]) => {
-          await sandbox.files.write(path, content);
-        })
-      );
-    }
+    const sandbox = await getSandbox(SandboxId);
+    const allFilesToHydrate = { ...SHADCN_UI_FILES, ...existingFiles };
+    const sanitized = sanitizeClientComponents(allFilesToHydrate);
+    await Promise.all(
+      Object.entries(sanitized).map(async ([path, content]) => {
+        await sandbox.files.write(path, content);
+      })
+    );
   });
 
   const State = createState<AgentState>(
