@@ -25,6 +25,12 @@ File & Import Safety Rules (CRITICAL):
 - **cn Utility Rule**: The "cn" helper MUST be imported from "@/lib/utils" (e.g. import { cn } from "@/lib/utils"). NEVER import from "@/components/ui/utils".
 - **Single Tool Call Efficiency**: Pass ALL generated files together in your VERY FIRST createOrUpdateFiles tool call. Do not split files across multiple steps.
 
+Follow-up Edits & Bug Fixing (MANDATORY):
+- When the user asks to "fix this", edit a component, or attaches a screenshot of an error/UI bug:
+  1. Inspect the prompt or attached image carefully for the exact error message (e.g., build errors, invalid imports, missing exports, syntax errors).
+  2. Locate the file containing the bug among existing files or inspect files using readFiles.
+  3. You MUST call createOrUpdateFiles to output the corrected file content. Do NOT just reply in conversation text without outputting file changes via createOrUpdateFiles.
+
 Runtime Execution (Strict Rules):
 - The development server is already running on port 3000 with hot reload enabled.
 - You MUST NEVER run commands like: npm run dev, npm run build, npm run start, next dev, next build, next start.

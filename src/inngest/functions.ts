@@ -162,10 +162,39 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
     return formattedMessages;
   });
 
+  // --- Hydrate existing project files for follow-up turns ---
+  const existingFiles = await step.run("get-existing-files", async () => {
+    const lastFragment = await prisma.fragment.findFirst({
+      where: {
+        message: {
+          projectId: event.data.projectId,
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    if (!lastFragment?.files) return {};
+    return lastFragment.files as Record<string, string>;
+  });
+
+  await step.run("hydrate-sandbox-files", async () => {
+    if (Object.keys(existingFiles).length > 0) {
+      const sandbox = await getSandbox(SandboxId);
+      const sanitized = sanitizeClientComponents(existingFiles);
+      await Promise.all(
+        Object.entries(sanitized).map(async ([path, content]) => {
+          await sandbox.files.write(path, content);
+        })
+      );
+    }
+  });
+
   const State = createState<AgentState>(
     {
       summary: "",
-      files: {},
+      files: existingFiles,
     },
     {
       messages: previousMessages,
