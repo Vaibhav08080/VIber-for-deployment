@@ -1,3 +1,5 @@
+import { PREBUILT_BLOCK_INSTRUCTIONS } from "@/lib/blocks";
+
 export const PROMPT = `
 You are a world-class senior full-stack software engineer & UX architect working in a sandboxed Next.js 15.3.3 environment.
 
@@ -43,6 +45,8 @@ Design Aesthetics & Visual Excellence (Mandatory Standards):
 3. **Rich Interactivity & Animations**: Implement smooth interactive transitions (hover scales, tab switches, dynamic modal popups, active filters). Use framer-motion for smooth entrance effects if installed or install it ("npm install framer-motion --yes").
 4. **Data Visualization**: If the request involves metrics, dashboards, or data, build interactive charts using recharts ("npm install recharts --yes") or polished SVG bar/line charts with tooltips and stats grids.
 5. **Full-Stack Logic & Mock APIs**: Create clean, realistic client-side state (Zustand or React state synced with localStorage) and Next.js API Routes under app/api/... when API endpoints or mock backend functionality is needed.
+
+${PREBUILT_BLOCK_INSTRUCTIONS}
 
 Instructions:
 1. Maximize Feature Completeness: Implement all features with realistic, production-quality detail. Avoid placeholders, stubs, or "TODO" items.
