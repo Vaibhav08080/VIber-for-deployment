@@ -2,9 +2,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { GitHubExportModal } from "./github-export-modal";
+import { SupabaseModal } from "./supabase-modal";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -14,6 +15,7 @@ import {
   XIcon,
   Trash2Icon,
   GithubIcon,
+  DatabaseIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hint } from "./hint";
@@ -53,11 +55,13 @@ export const ProjectHeader = ({ projectId }: Props) => {
     const router = useRouter();
     const { theme, setTheme } = useTheme();
     const { data: project } = useSuspenseQuery(trpc.projects.getOne.queryOptions({ id: projectId }));
+    const { data: supabaseStatus } = useQuery(trpc.supabase.getStatus.queryOptions({ projectId }));
 
     const [isEditing, setIsEditing] = useState(false);
     const [draftName, setDraftName] = useState(project.name);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showGithubModal, setShowGithubModal] = useState(false);
+    const [showSupabaseModal, setShowSupabaseModal] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { mutate: rename, isPending: isRenaming } = useMutation(
@@ -153,6 +157,10 @@ export const ProjectHeader = ({ projectId }: Props) => {
                             <GithubIcon className="mr-2 h-4 w-4 shrink-0 opacity-50"/>
                             <span>Export / Sync to GitHub</span>
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setShowSupabaseModal(true)}>
+                            <DatabaseIcon className="mr-2 h-4 w-4 shrink-0 opacity-50 text-emerald-500"/>
+                            <span>Supabase Connection</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator/>
                         <DropdownMenuSub>
                             <DropdownMenuSubTrigger className="gap-2">
@@ -180,6 +188,22 @@ export const ProjectHeader = ({ projectId }: Props) => {
                     </DropdownMenuContent>
                 </DropdownMenu>
 
+                <Hint text={supabaseStatus?.isConnected ? "Supabase Cloud Database Connected ⚡" : "Connect project to Supabase database"} side="bottom">
+                    <Button
+                        size="sm"
+                        variant={supabaseStatus?.isConnected ? "secondary" : "outline"}
+                        onClick={() => setShowSupabaseModal(true)}
+                        className={`gap-1.5 text-xs h-7 px-2 font-mono transition-all ${
+                          supabaseStatus?.isConnected ? "border-emerald-500/40 text-emerald-600 dark:text-emerald-400" : ""
+                        }`}
+                    >
+                        <DatabaseIcon className="size-3.5 text-emerald-500" />
+                        <span className="hidden sm:inline">
+                            {supabaseStatus?.isConnected ? "Supabase" : "Supabase"}
+                        </span>
+                    </Button>
+                </Hint>
+
                 <Hint text={project.githubRepo ? "GitHub Repo Synced ⚡" : "Export project to GitHub 🐙"} side="bottom">
                     <Button
                         size="sm"
@@ -196,6 +220,14 @@ export const ProjectHeader = ({ projectId }: Props) => {
             </div>
         )}
     </header>
+
+    {/* Supabase Connection Modal */}
+    <SupabaseModal
+        projectId={projectId}
+        projectName={project.name}
+        isOpen={showSupabaseModal}
+        onClose={() => setShowSupabaseModal(false)}
+    />
 
     {/* GitHub Export Modal */}
     <GitHubExportModal

@@ -1,7 +1,7 @@
 import { openai, createAgent, createTool, createNetwork, type Tool, Message, createState } from "@inngest/agent-kit";
 import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
-import { getSandbox, lastAssistantTextMessageContent } from "./utils";
+import { getSandbox, lastAssistantTextMessageContent, sanitizeClientComponents, autoInstallMissingPackages } from "./utils";
 import { z } from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
 import { prisma } from "@/lib/db";
@@ -165,10 +165,34 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
   messages: previousMessages,
  }
 )
+    const projectDb = await step.run("get-project-details", async () => {
+      return await prisma.project.findUnique({
+        where: { id: event.data.projectId },
+        select: { supabaseUrl: true, supabaseAnonKey: true },
+      });
+    });
+
+    let systemPrompt = PROMPT;
+    if (projectDb?.supabaseUrl && projectDb?.supabaseAnonKey) {
+      systemPrompt += `\n\nSUPABASE DATABASE CONNECTED:
+This project is connected to the user's live Supabase instance:
+- Supabase URL: "${projectDb.supabaseUrl}"
+- Supabase Anon Key: "${projectDb.supabaseAnonKey}"
+
+You MUST:
+1. Use the terminal tool to install @supabase/supabase-js if needed ("npm install @supabase/supabase-js --yes").
+2. Create a Supabase client helper at "lib/supabase.ts":
+   import { createClient } from "@supabase/supabase-js";
+   export const supabase = createClient("${projectDb.supabaseUrl}", "${projectDb.supabaseAnonKey}");
+3. Use real Supabase client queries (e.g., supabase.from('items').select('*')) for backend/data logic.
+4. Provide a "supabase/schema.sql" file containing the SQL DDL statements (CREATE TABLE, RLS policies) for setting up the user's Supabase tables.
+`;
+    }
+
     const codeAgent = createAgent<AgentState>({
       name: "code-agent",
       description: "An expert coding agent",
-      system: PROMPT,
+      system: systemPrompt,
       model: openai({
         model: "gpt-4.1",
         defaultParameters: {
@@ -223,9 +247,16 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
               try {
                 const updatedFiles = network.state.data.files || {};
                 const sandbox = await getSandbox(SandboxId);
+                // Self-Healing QA: Auto-insert "use client" header if missing on React client components
+                const rawFileMap: Record<string, string> = {};
                 for (const file of files) {
-                  await sandbox.files.write(file.path, file.content);
-                  updatedFiles[file.path] = file.content;
+                  rawFileMap[file.path] = file.content;
+                }
+                const sanitizedMap = sanitizeClientComponents(rawFileMap);
+
+                for (const [filePath, content] of Object.entries(sanitizedMap)) {
+                  await sandbox.files.write(filePath, content);
+                  updatedFiles[filePath] = content;
                 }
                 return updatedFiles;
               } catch (error) {
@@ -302,6 +333,16 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
 
     await step.run("progress-ai-coding-done", async () => {
       await completeProgress(event.data.projectId, "AI is writing your code...");
+    });
+
+    // --- Progress: Self-Healing QA Check ---
+    await step.run("qa-self-healing-packages", async () => {
+      await updateProgress(event.data.projectId, "Running QA diagnostics & auto-healing...");
+      const sandbox = await getSandbox(SandboxId);
+      if (result.state.data.files) {
+        await autoInstallMissingPackages(sandbox, result.state.data.files);
+      }
+      await completeProgress(event.data.projectId, "Running QA diagnostics & auto-healing...");
     });
 
     const fragmentTitleGenerator = createAgent({
