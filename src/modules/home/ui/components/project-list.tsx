@@ -143,20 +143,20 @@ export const ProjectList = () => {
 
   return (
     <>
-      <div className="w-full glass-panel rounded-2xl p-6 md:p-8 border border-black/10 dark:border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12 bg-white dark:bg-[#121414]/80 shadow-md dark:shadow-2xl">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-black/10 dark:border-[#444748]/20 pb-4">
-          <h2 className="text-xl md:text-2xl font-bold font-['Sora'] tracking-tight text-[#090909] dark:text-[#e3e2e2]">
+      <div className="w-full rounded-3xl p-6 md:p-8 border border-neutral-200/90 dark:border-[#444748]/30 flex flex-col gap-y-6 max-w-5xl mx-auto my-12 bg-white/95 dark:bg-[#121414]/80 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-2xl">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-200/80 dark:border-[#444748]/20 pb-4">
+          <h2 className="text-xl md:text-2xl font-extrabold font-['Sora'] tracking-tight text-[#090909] dark:text-[#e3e2e2]">
             {user?.firstName}&apos;s Projects
           </h2>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#FF6A3D]/10 dark:bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
+            <span className="text-xs font-mono text-[#FF6A3D] uppercase tracking-widest bg-[#FF6A3D]/10 dark:bg-[#ab2f01]/20 px-3 py-1 rounded-full border border-[#FF6A3D]/30 font-bold">
               {projects?.length || 0} Saved
             </span>
             {!!projects && projects.length > 0 && (
               <button
                 type="button"
                 onClick={() => setShowDeleteAllDialog(true)}
-                className="text-xs font-mono text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-900/50 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="text-xs font-mono text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-900/50 transition-all flex items-center gap-1.5 cursor-pointer font-semibold shadow-xs"
                 title="Delete all projects"
               >
                 <Trash2Icon className="size-3.5" />
@@ -172,8 +172,8 @@ export const ProjectList = () => {
               <div className="size-14 rounded-2xl bg-neutral-100 dark:bg-[#1e2020] border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center text-2xl">
                 ✨
               </div>
-              <p className="font-medium text-sm text-[#090909] dark:text-[#e3e2e2]">No projects yet</p>
-              <p className="text-xs text-neutral-500 dark:text-[#8e9192] max-w-[220px]">
+              <p className="font-bold text-sm text-[#090909] dark:text-[#e3e2e2]">No projects yet</p>
+              <p className="text-xs text-neutral-600 dark:text-[#8e9192] max-w-[240px]">
                 Describe your application above and SparkSite will generate it for you.
               </p>
             </div>
@@ -182,7 +182,7 @@ export const ProjectList = () => {
             <div key={project.id} className="relative group">
               <Button
                 variant="outline"
-                className="font-normal h-auto justify-start w-full text-start p-4 pr-16 bg-neutral-50 dark:bg-[#121414]/80 border-neutral-200 dark:border-[#444748]/30 hover:border-[#FF6A3D]/60 hover:bg-white dark:hover:bg-[#1a1c1c] transition-all rounded-xl shadow-xs"
+                className="font-normal h-auto justify-start w-full text-start p-4 pr-16 bg-white dark:bg-[#121414]/80 border-neutral-200/90 dark:border-[#444748]/30 hover:border-[#FF6A3D] hover:bg-neutral-50/60 dark:hover:bg-[#1a1c1c] transition-all rounded-2xl shadow-xs hover:shadow-md"
                 asChild
               >
                 <Link href={`/projects/${project.id}`}>

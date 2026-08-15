@@ -285,11 +285,26 @@ export const CinematicBackground = () => {
     };
   }, [isLight]);
 
-  // Light Mode Background: Extremely calm, professional, static minimal background (0 CPU/GPU overhead)
+  // Light Mode Background: Ultra-clean, luxurious warm ambient background with subtle micro-grid depth
   if (isLight) {
     return (
-      <div className="fixed inset-0 z-0 pointer-events-none bg-[#faf9f6] text-[#090909]">
-        <div className="absolute inset-0 bg-radial from-orange-50/40 via-transparent to-transparent opacity-60" />
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#faf9f6] text-[#090909] overflow-hidden">
+        {/* Subtle Warm Amber/Coral Ambient Radial Glow */}
+        <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(255,106,61,0.08),rgba(255,255,255,0))] blur-3xl pointer-events-none" />
+        
+        {/* Elegant Micro-Grid Texture */}
+        <div 
+          className="absolute inset-0 opacity-[0.45] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px)`,
+            backgroundSize: `32px 32px`,
+            maskImage: `radial-gradient(ellipse 70% 70% at 50% 30%, #000 60%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(ellipse 70% 70% at 50% 30%, #000 60%, transparent 100%)`
+          }}
+        />
+
+        {/* Subtle Bottom Ambient Gradient */}
+        <div className="absolute bottom-0 inset-x-0 h-96 bg-[radial-gradient(ellipse_at_bottom,rgba(255,106,61,0.04),transparent)] pointer-events-none" />
       </div>
     );
   }

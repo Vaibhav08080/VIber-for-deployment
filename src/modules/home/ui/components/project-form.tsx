@@ -150,14 +150,14 @@ export const ProjectForm = () => {
         {/* Glassmorphic Prompt Input Container */}
         <div
           className={cn(
-            "glass-panel p-2 md:p-3 rounded-2xl border border-black/10 dark:border-[#444748]/30 shadow-xl transition-all duration-300 bg-white dark:bg-[#121414]/80 flex flex-col gap-2",
-            isFocused && "border-[#FF6A3D]/60 ring-2 ring-[#FF6A3D]/20 shadow-2xl"
+            "p-2 md:p-3 rounded-2xl border border-neutral-200/90 dark:border-[#444748]/30 shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:shadow-2xl transition-all duration-300 bg-white/95 dark:bg-[#121414]/85 backdrop-blur-xl flex flex-col gap-2",
+            isFocused && "border-[#FF6A3D] ring-4 ring-[#FF6A3D]/15 shadow-2xl"
           )}
         >
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col md:flex-row items-center gap-3">
             <div className="flex-1 w-full px-4 py-2 flex flex-col gap-2">
               <div className="flex items-start gap-3 w-full">
-                <span className="material-symbols-outlined text-neutral-400 dark:text-[#8e9192] mt-3">auto_awesome</span>
+                <span className="material-symbols-outlined text-[#FF6A3D] mt-3">auto_awesome</span>
                 <FormField
                   control={form.control}
                   name="value"
@@ -194,7 +194,7 @@ export const ProjectForm = () => {
                   <button
                     type="button"
                     onClick={() => setImageDataUrl(null)}
-                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-transform active:scale-95"
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-lg transition-transform active:scale-95 cursor-pointer"
                     title="Remove attachment"
                   >
                     <XIcon className="size-3.5" />
@@ -204,10 +204,10 @@ export const ProjectForm = () => {
             </div>
 
             {/* Action Buttons Toolbar */}
-            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 p-2 w-full md:w-auto border-t md:border-t-0 md:border-l border-black/10 dark:border-[#444748]/30">
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-3 p-2 w-full md:w-auto border-t md:border-t-0 md:border-l border-neutral-200/80 dark:border-[#444748]/30">
               <div className="flex items-center gap-1.5">
                 {/* Mode Selector Toggle */}
-                <div className="flex items-center bg-neutral-100 dark:bg-[#1a1c1c] p-0.5 rounded-xl border border-black/5 dark:border-white/5 mr-1">
+                <div className="flex items-center bg-neutral-100 dark:bg-[#1a1c1c] p-0.5 rounded-xl border border-neutral-200/60 dark:border-white/5 mr-1">
                   <button
                     type="button"
                     disabled={isPending || isEnhancing}
@@ -216,8 +216,8 @@ export const ProjectForm = () => {
                     className={cn(
                       "px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
                       mode === "BUILD"
-                        ? "bg-white dark:bg-[#292a2a] text-[#090909] dark:text-[#e3e2e2] shadow-xs font-semibold"
-                        : "text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                        ? "bg-white dark:bg-[#292a2a] text-[#090909] dark:text-[#e3e2e2] shadow-xs font-bold"
+                        : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
                     )}
                   >
                     <span>🏗️</span>
@@ -231,8 +231,8 @@ export const ProjectForm = () => {
                     className={cn(
                       "px-2.5 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 cursor-pointer",
                       mode === "DISCUSS"
-                        ? "bg-white dark:bg-[#292a2a] text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
-                        : "text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                        ? "bg-white dark:bg-[#292a2a] text-blue-600 dark:text-blue-400 shadow-xs font-bold"
+                        : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
                     )}
                   >
                     <span>💬</span>
@@ -247,12 +247,12 @@ export const ProjectForm = () => {
                   onClick={() => fileInputRef.current?.click()}
                   title="Attach screenshot or image"
                   className={cn(
-                    "p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-colors text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono cursor-pointer",
-                    imageDataUrl && "text-[#FF6A3D] dark:text-[#FF6A3D] font-semibold"
+                    "p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-colors text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono cursor-pointer font-medium",
+                    imageDataUrl && "text-[#FF6A3D] dark:text-[#FF6A3D] font-bold"
                   )}
                 >
                   <PaperclipIcon className="size-4" />
-                  <span className="hidden sm:inline">{imageDataUrl ? "Image Added" : "Attach"}</span>
+                  <span className="hidden sm:inline">{imageDataUrl ? "Added" : "Attach"}</span>
                 </button>
 
                 {/* Voice Input */}
@@ -274,7 +274,7 @@ export const ProjectForm = () => {
                   onClick={handleEnhance}
                   title="Enhance prompt with AI"
                   className={cn(
-                    "p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-colors text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono cursor-pointer",
+                    "p-2.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-colors text-neutral-600 dark:text-[#8e9192] hover:text-[#090909] dark:hover:text-[#e3e2e2] flex items-center gap-1.5 text-xs font-mono cursor-pointer font-medium",
                     isEnhancing && "text-purple-500 animate-pulse"
                   )}
                 >
@@ -292,7 +292,7 @@ export const ProjectForm = () => {
                 type="submit"
                 disabled={isButtonDisabled}
                 className={cn(
-                  "bg-[#FF6A3D] text-white dark:text-[#3b0a00] px-7 py-3 rounded-xl font-['Geist'] text-xs uppercase tracking-widest font-extrabold hover:bg-[#ff8a6d] active:scale-95 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,106,61,0.3)] cursor-pointer",
+                  "bg-[#FF6A3D] text-white px-7 py-3 rounded-xl font-['Geist'] text-xs uppercase tracking-widest font-extrabold hover:bg-[#ff7a52] active:scale-95 transition-all flex items-center gap-2 shadow-[0_4px_20px_rgba(255,106,61,0.35)] cursor-pointer",
                   isButtonDisabled && "opacity-50 cursor-not-allowed hover:bg-[#FF6A3D] active:scale-100 shadow-none"
                 )}
               >
@@ -313,7 +313,7 @@ export const ProjectForm = () => {
 
           {/* Shortcut hint */}
           <div className="px-4 pb-2 text-[11px] text-neutral-400 dark:text-[#8e9192] font-mono flex items-center justify-end gap-1">
-            <kbd className="inline-flex h-4 items-center gap-0.5 rounded border border-neutral-200 dark:border-[#444748]/50 bg-neutral-100 dark:bg-[#1a1c1c] px-1 text-[10px] text-neutral-600 dark:text-[#c4c7c7]">
+            <kbd className="inline-flex h-4 items-center gap-0.5 rounded border border-neutral-200 dark:border-[#444748]/50 bg-neutral-100 dark:bg-[#1a1c1c] px-1.5 text-[10px] text-neutral-600 dark:text-[#c4c7c7] font-medium">
               <span>⌘</span>Enter
             </kbd>
             <span>to submit</span>
@@ -321,12 +321,12 @@ export const ProjectForm = () => {
         </div>
 
         {/* Template Pills */}
-        <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto pt-2">
+        <div className="flex flex-wrap justify-center gap-2.5 max-w-3xl mx-auto pt-2">
           {PROJECT_TEMPLATES.map((template) => (
             <button
               key={template.title}
               type="button"
-              className="bg-white dark:bg-[#121414]/80 border border-neutral-200/90 dark:border-[#444748]/40 hover:border-[#FF6A3D]/60 text-neutral-800 dark:text-[#c4c7c7] hover:text-[#090909] dark:hover:text-[#e3e2e2] px-4 py-2 rounded-full text-xs font-['Geist'] transition-all backdrop-blur-md flex items-center gap-1.5 shadow-xs hover:shadow-sm cursor-pointer"
+              className="bg-white/95 dark:bg-[#121414]/80 border border-neutral-200/90 dark:border-[#444748]/40 hover:border-[#FF6A3D] text-neutral-700 dark:text-[#c4c7c7] hover:text-[#090909] dark:hover:text-[#e3e2e2] px-4 py-2 rounded-full text-xs font-['Geist'] font-medium transition-all backdrop-blur-md flex items-center gap-2 shadow-xs hover:shadow-md cursor-pointer hover:scale-[1.02]"
               onClick={() => onSelect(template.prompt)}
             >
               <span>{template.emoji}</span>

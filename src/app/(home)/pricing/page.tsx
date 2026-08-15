@@ -214,70 +214,70 @@ export default function PricingPage() {
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
           {/* Free Plan */}
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-black/10 dark:border-[#444748]/30 shadow-xl dark:shadow-2xl backdrop-blur-xl bg-white dark:bg-[#121414]/90 flex flex-col text-left">
+          <div className="p-6 sm:p-8 rounded-3xl border border-neutral-200/90 dark:border-[#444748]/30 shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-[#121414]/90 flex flex-col text-left">
             <div className="flex items-center gap-2 mb-2">
-              <ZapIcon className="size-5 text-neutral-400" />
-              <span className="font-semibold text-lg">{FREE_PLAN.name}</span>
+              <ZapIcon className="size-5 text-neutral-500" />
+              <span className="font-bold text-lg text-[#090909] dark:text-[#e3e2e2]">{FREE_PLAN.name}</span>
             </div>
-            <div className="text-4xl font-extrabold mb-1">
+            <div className="text-4xl font-extrabold mb-1 text-[#090909] dark:text-[#e3e2e2]">
               {FREE_PLAN.currency}0{" "}
-              <span className="text-base font-normal text-muted-foreground">/ forever</span>
+              <span className="text-base font-normal text-neutral-500 dark:text-[#8e9192]">/ forever</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">{FREE_PLAN.description}</p>
-            <ul className="space-y-2 mb-8 flex-1">
+            <p className="text-sm text-neutral-600 dark:text-[#8e9192] mb-6">{FREE_PLAN.description}</p>
+            <ul className="space-y-2.5 mb-8 flex-1">
               {FREE_PLAN.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm">
-                  <CheckIcon className="size-4 text-green-500 shrink-0" />
+                <li key={f} className="flex items-center gap-2.5 text-sm text-neutral-700 dark:text-[#c4c7c7]">
+                  <CheckIcon className="size-4 text-emerald-500 shrink-0 font-bold" />
                   {f}
                 </li>
               ))}
             </ul>
-            <Button variant="outline" className="w-full" disabled>
+            <Button variant="outline" className="w-full rounded-xl border-neutral-200 dark:border-neutral-700" disabled>
               Current Plan
             </Button>
           </div>
 
           {/* Pro Plan */}
-          <div className="relative glass-panel p-6 sm:p-8 rounded-3xl border-2 border-[#FF6A3D]/60 shadow-2xl backdrop-blur-xl bg-white dark:bg-[#121414]/90 flex flex-col text-left overflow-hidden">
+          <div className="relative p-6 sm:p-8 rounded-3xl border-2 border-[#FF6A3D] shadow-[0_8px_30px_rgba(255,106,61,0.12)] dark:shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-[#121414]/90 flex flex-col text-left overflow-hidden">
             {/* Popular badge */}
-            <div className="absolute top-4 right-4 bg-[#FF6A3D] text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+            <div className="absolute top-4 right-4 bg-[#FF6A3D] text-white text-[10px] font-extrabold uppercase tracking-wider px-3.5 py-1 rounded-full shadow-xs">
               Most Popular
             </div>
 
             <div className="flex items-center gap-2 mb-2">
               <CrownIcon className="size-5 text-[#FF6A3D]" />
-              <span className="font-semibold text-lg">{PRO_PLAN.name}</span>
+              <span className="font-bold text-lg text-[#090909] dark:text-[#e3e2e2]">{PRO_PLAN.name}</span>
             </div>
-            <div className="text-4xl font-extrabold mb-1">
+            <div className="text-4xl font-extrabold mb-1 text-[#090909] dark:text-[#e3e2e2]">
               {PRO_PLAN.currency}
               {PRO_PLAN.price}{" "}
-              <span className="text-base font-normal text-muted-foreground">/ one-time</span>
+              <span className="text-base font-normal text-neutral-500 dark:text-[#8e9192]">/ one-time</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">{PRO_PLAN.description}</p>
-            <ul className="space-y-2 mb-8 flex-1">
+            <p className="text-sm text-neutral-600 dark:text-[#8e9192] mb-6">{PRO_PLAN.description}</p>
+            <ul className="space-y-2.5 mb-8 flex-1">
               {PRO_PLAN.features.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm">
-                  <CheckIcon className="size-4 text-[#FF6A3D] shrink-0" />
+                <li key={f} className="flex items-center gap-2.5 text-sm text-neutral-800 dark:text-[#c4c7c7] font-medium">
+                  <CheckIcon className="size-4 text-[#FF6A3D] shrink-0 font-bold" />
                   {f}
                 </li>
               ))}
             </ul>
 
             {checkingStatus ? (
-              <Button className="w-full" disabled>
+              <Button className="w-full rounded-xl" disabled>
                 <Loader2Icon className="size-4 animate-spin" />
                 Checking status...
               </Button>
             ) : isPro ? (
               <Button
-                className="w-full bg-green-600 hover:bg-green-700 text-white cursor-default"
+                className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white cursor-default font-bold"
                 disabled
               >
                 <CheckIcon className="size-4" /> Active — Pro Plan
               </Button>
             ) : (
               <Button
-                className="w-full bg-[#FF6A3D] hover:bg-[#ff8a6d] text-white font-semibold shadow-lg transition-all"
+                className="w-full rounded-xl bg-[#FF6A3D] hover:bg-[#ff7a52] text-white font-extrabold shadow-[0_4px_20px_rgba(255,106,61,0.35)] transition-all cursor-pointer"
                 onClick={handleUpgrade}
                 disabled={isPaying}
               >

@@ -38,28 +38,28 @@ export default function Home() {
         <section className="max-w-[1440px] mx-auto px-6 md:px-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[640px] pb-16">
           {/* Hero Left Content */}
           <div className="flex flex-col gap-8">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-[#121414]/90 border border-neutral-200 dark:border-[#FF6A3D]/30 w-fit backdrop-blur-md shadow-xs">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 dark:bg-[#121414]/90 border border-neutral-200/90 dark:border-[#FF6A3D]/30 w-fit backdrop-blur-md shadow-xs">
               <span className="w-2 h-2 rounded-full bg-[#FF6A3D] animate-ping" />
-              <span className="text-xs uppercase tracking-widest font-mono text-neutral-700 dark:text-[#c4c7c7] font-semibold">
+              <span className="text-xs uppercase tracking-widest font-mono text-neutral-800 dark:text-[#c4c7c7] font-bold">
                 Editorial AI Engine 2.0
               </span>
             </div>
 
             <h1 className="font-['Sora'] text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tighter uppercase text-[#090909] dark:text-[#e3e2e2]">
               BUILD. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#090909] dark:from-[#e3e2e2] via-[#FF6A3D] to-[#ff9d7d]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6A3D] via-[#ff7852] to-[#ff9f82]">
                 WITHOUT LIMITS.
               </span>
             </h1>
 
-            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-neutral-600 dark:text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
+            <p className="font-['Geist'] text-base sm:text-lg md:text-xl text-neutral-700 dark:text-[#c4c7c7] max-w-lg border-l-2 border-[#FF6A3D] pl-6 py-2 leading-relaxed">
               The elite AI engine for developers and creators who demand precision. Performance-tuned for the next generation of digital excellence.
             </p>
 
             <div className="flex items-center gap-4 mt-2">
               <button
                 onClick={scrollToPrompt}
-                className="bg-[#FF6A3D] text-white dark:text-[#3b0a00] px-8 py-4 rounded-xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_30px_rgba(255,106,61,0.3)] flex items-center gap-2 cursor-pointer group"
+                className="bg-[#FF6A3D] text-white px-8 py-4 rounded-xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff7a52] active:scale-95 transition-all shadow-[0_4px_25px_rgba(255,106,61,0.35)] flex items-center gap-2 cursor-pointer group"
               >
                 <span>Start Building</span>
                 <span className="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">
@@ -77,14 +77,14 @@ export default function Home() {
             }}
           >
             {/* Glass Browser Wireframe */}
-            <div className="absolute top-0 right-0 w-[420px] h-[280px] bg-white/90 dark:bg-[#121414]/80 rounded-2xl border border-neutral-200 dark:border-[#444748]/40 shadow-xl dark:shadow-2xl overflow-hidden glass-panel backdrop-blur-xl">
-              <div className="flex items-center gap-2 p-3 border-b border-neutral-200 dark:border-[#444748]/30 bg-neutral-50 dark:bg-[#0d0e0f]/50">
+            <div className="absolute top-0 right-0 w-[420px] h-[280px] bg-white/95 dark:bg-[#121414]/90 rounded-2xl border border-neutral-200/90 dark:border-[#444748]/40 shadow-xl dark:shadow-2xl overflow-hidden glass-panel backdrop-blur-xl">
+              <div className="flex items-center gap-2 p-3 border-b border-neutral-200/80 dark:border-[#444748]/30 bg-neutral-50/80 dark:bg-[#0d0e0f]/50">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
-                <div className="mx-auto bg-neutral-200 dark:bg-[#292a2a] px-4 py-0.5 rounded text-[10px] font-mono text-neutral-600 dark:text-[#8e9192]">
+                <div className="mx-auto bg-neutral-200/80 dark:bg-[#292a2a] px-4 py-0.5 rounded text-[10px] font-mono text-neutral-700 dark:text-[#8e9192]">
                   sparksite.dev/preview/active
                 </div>
               </div>
@@ -135,7 +135,7 @@ export default function Home() {
 
             {/* Floating Energy Node */}
             <div className="absolute top-1/2 left-1/3 w-9 h-9 rounded-full bg-[#FF6A3D] shadow-[0_0_25px_rgba(255,106,61,0.6)] flex items-center justify-center animate-bounce">
-              <span className="material-symbols-outlined text-[#3b0a00] text-lg font-bold">
+              <span className="material-symbols-outlined text-white text-lg font-bold">
                 bolt
               </span>
             </div>
@@ -145,10 +145,10 @@ export default function Home() {
         {/* 2. SparkSite Editor (Prompt UI) */}
         <section id="prompt-builder" className="max-w-[1440px] mx-auto px-6 md:px-20 py-12 scroll-mt-32">
           <div className="text-center mb-8">
-            <span className="text-xs uppercase font-mono tracking-[0.3em] text-[#FF6A3D]">
+            <span className="text-xs uppercase font-mono tracking-[0.3em] text-[#FF6A3D] font-bold">
               Prompt Interface
             </span>
-            <h2 className="font-['Sora'] text-2xl sm:text-3xl font-bold tracking-tight text-[#090909] dark:text-[#e3e2e2] mt-2">
+            <h2 className="font-['Sora'] text-2xl sm:text-3xl font-extrabold tracking-tight text-[#090909] dark:text-[#e3e2e2] mt-2">
               Describe Your Vision in Natural Language
             </h2>
           </div>
@@ -161,9 +161,9 @@ export default function Home() {
         </section>
 
         {/* 4. Trust & Social Proof Marquee */}
-        <section className="w-full overflow-hidden border-y border-neutral-200 dark:border-[#444748]/20 py-12 bg-neutral-100/80 dark:bg-[#0d0e0f]/50 backdrop-blur-sm my-16">
+        <section className="w-full overflow-hidden border-y border-neutral-200/80 dark:border-[#444748]/20 py-12 bg-neutral-100/70 dark:bg-[#0d0e0f]/50 backdrop-blur-sm my-16">
           <div className="flex animate-scroll whitespace-nowrap items-center gap-24">
-            <div className="flex items-center gap-24 grayscale opacity-50 dark:opacity-40 hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-24 grayscale opacity-60 dark:opacity-40 hover:opacity-100 transition-opacity">
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">LINEAR</span>
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">INNGEST</span>
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">APPLE</span>
@@ -171,7 +171,7 @@ export default function Home() {
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">STRIPE</span>
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">FRAMER</span>
             </div>
-            <div className="flex items-center gap-24 grayscale opacity-50 dark:opacity-40 hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-24 grayscale opacity-60 dark:opacity-40 hover:opacity-100 transition-opacity">
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">LINEAR</span>
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">INNGEST</span>
               <span className="font-['Sora'] text-2xl font-bold tracking-tighter text-[#090909] dark:text-[#e3e2e2]">APPLE</span>
@@ -187,7 +187,7 @@ export default function Home() {
           {/* Feature Block 1: Architecture */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-6">
-              <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
+              <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D] font-bold">
                 Architecture
               </span>
               <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#090909] dark:text-[#e3e2e2] uppercase">
@@ -198,13 +198,13 @@ export default function Home() {
                 SparkSite doesn&apos;t just write code; it architecturally understands intent. Using our proprietary Cinematic LLM, we generate high-fidelity layouts that respect your design system&apos;s soul.
               </p>
               <div className="pt-2">
-                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
+                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer font-semibold shadow-xs">
                   Documentation
                 </button>
               </div>
             </div>
 
-            <div className="relative aspect-video glass-panel rounded-2xl border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center p-8 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
+            <div className="relative aspect-video glass-panel rounded-2xl border border-neutral-200/90 dark:border-[#444748]/30 flex items-center justify-center p-8 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
               <div className="absolute inset-0 bg-gradient-to-tr from-[#FF6A3D]/10 to-transparent" />
               <div className="w-full h-full border border-neutral-200 dark:border-[#444748]/20 rounded-xl bg-neutral-50 dark:bg-[#0d0e0f]/80 p-4 space-y-3 relative z-10">
                 <div className="flex gap-2">
@@ -222,7 +222,7 @@ export default function Home() {
 
           {/* Feature Block 2: Performance */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1 relative aspect-square glass-panel rounded-2xl border border-neutral-200 dark:border-[#444748]/30 flex items-center justify-center p-12 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
+            <div className="order-2 lg:order-1 relative aspect-square glass-panel rounded-2xl border border-neutral-200/90 dark:border-[#444748]/30 flex items-center justify-center p-12 overflow-hidden group shadow-xl dark:shadow-2xl bg-white dark:bg-[#121414]">
               <div className="absolute inset-0 bg-gradient-to-bl from-[#FF6A3D]/10 to-transparent" />
               <div className="w-full flex flex-col items-center gap-6 relative z-10">
                 <div className="w-24 h-24 border border-[#FF6A3D]/40 rounded-full flex items-center justify-center animate-pulse bg-[#FF6A3D]/10">
@@ -234,7 +234,7 @@ export default function Home() {
                   <div className="h-1.5 bg-neutral-200 dark:bg-[#292a2a] w-full rounded-full overflow-hidden">
                     <div className="h-full bg-[#FF6A3D] w-1/3 animate-pulse" />
                   </div>
-                  <span className="font-mono text-xs text-neutral-500 dark:text-[#8e9192]">
+                  <span className="font-mono text-xs text-neutral-600 dark:text-[#8e9192]">
                     Synchronizing data nodes across 35 edges...
                   </span>
                 </div>
@@ -242,7 +242,7 @@ export default function Home() {
             </div>
 
             <div className="order-1 lg:order-2 space-y-6 lg:pl-12">
-              <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
+              <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D] font-bold">
                 Performance
               </span>
               <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold leading-tight text-[#090909] dark:text-[#e3e2e2] uppercase">
@@ -253,7 +253,7 @@ export default function Home() {
                 Deploy your SparkSite-generated apps instantly to the edge. Our native integration with Vercel and AWS ensures sub-100ms response times globally.
               </p>
               <div className="pt-2">
-                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer shadow-xs">
+                <button className="border border-neutral-300 dark:border-[#444748]/50 px-8 py-3.5 rounded-xl text-xs font-mono tracking-wider uppercase text-[#090909] dark:text-[#e3e2e2] hover:bg-neutral-100 dark:hover:bg-[#292a2a] transition-all cursor-pointer font-semibold shadow-xs">
                   View Infrastructure
                 </button>
               </div>
@@ -264,7 +264,7 @@ export default function Home() {
         {/* 6. Showcase Gallery */}
         <section id="showcase" className="max-w-[1440px] mx-auto px-6 md:px-20 py-20 scroll-mt-32">
           <div className="text-center max-w-xl mx-auto space-y-4 mb-16">
-            <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D]">
+            <span className="text-xs uppercase font-mono tracking-[0.4em] text-[#FF6A3D] font-bold">
               Gallery
             </span>
             <h2 className="font-['Sora'] text-4xl font-extrabold text-[#090909] dark:text-[#e3e2e2] tracking-tight uppercase">
@@ -281,7 +281,7 @@ export default function Home() {
               href="https://ripple-testimonials.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,106,61,0.15)] cursor-pointer block"
+              className="group relative rounded-3xl border border-neutral-200/90 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] cursor-pointer block"
             >
               <div className="aspect-video relative overflow-hidden">
                 <Image
@@ -316,7 +316,7 @@ export default function Home() {
               href="https://glam-cosmetics-universe-hqlr.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,106,61,0.15)] cursor-pointer block"
+              className="group relative rounded-3xl border border-neutral-200/90 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01] hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] cursor-pointer block"
             >
               <div className="aspect-video relative overflow-hidden">
                 <Image
@@ -350,23 +350,27 @@ export default function Home() {
 
         {/* 7. Call To Action Footer Banner */}
         <section className="max-w-[1440px] mx-auto px-6 md:px-20 py-24">
-          <div className="relative rounded-3xl p-12 md:p-20 text-center overflow-hidden border border-neutral-800 bg-[#090909] text-white shadow-2xl">
-            <div className="absolute inset-0 bg-radial from-[#FF6A3D]/20 via-transparent to-transparent opacity-60 pointer-events-none" />
-            <div className="relative z-10 max-w-2xl mx-auto space-y-8">
+          <div className="relative rounded-3xl p-12 md:p-20 text-center overflow-hidden border border-neutral-900/10 dark:border-neutral-800 bg-[#0d1117] text-white shadow-[0_20px_60px_rgba(0,0,0,0.12)] dark:shadow-2xl">
+            {/* Ambient Radial Accent */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,106,61,0.22),transparent_70%)] pointer-events-none" />
+            <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+              <span className="text-xs uppercase font-mono tracking-[0.35em] text-[#FF6A3D] font-bold">
+                Start Today
+              </span>
               <h2 className="font-['Sora'] text-4xl sm:text-5xl font-extrabold uppercase tracking-tight text-white leading-tight">
                 Ready to build <br />
-                <span className="text-[#FF6A3D]">without boundaries?</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FF6A3D] via-[#ff7852] to-[#ff9d7d]">without boundaries?</span>
               </h2>
-              <p className="font-['Geist'] text-neutral-400 text-lg">
-                Join thousands of developers creating the future of the web with SparkSite AI.
+              <p className="font-['Geist'] text-neutral-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+                Join thousands of developers and creators generating next-generation web applications with SparkSite AI.
               </p>
               <div className="pt-4 flex justify-center">
                 <button
                   onClick={scrollToPrompt}
-                  className="bg-[#FF6A3D] text-[#3b0a00] px-10 py-5 rounded-2xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff8a6d] active:scale-95 transition-all shadow-[0_0_35px_rgba(255,106,61,0.4)] flex items-center gap-3 cursor-pointer"
+                  className="bg-[#FF6A3D] text-white px-10 py-4.5 rounded-2xl font-['Geist'] text-xs font-extrabold tracking-widest uppercase hover:bg-[#ff7a52] active:scale-95 transition-all shadow-[0_4px_30px_rgba(255,106,61,0.45)] flex items-center gap-3 cursor-pointer group"
                 >
                   <span>Launch Editor</span>
-                  <span className="material-symbols-outlined text-lg">rocket_launch</span>
+                  <span className="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">rocket_launch</span>
                 </button>
               </div>
             </div>
@@ -374,20 +378,20 @@ export default function Home() {
         </section>
 
         {/* 8. Footer */}
-        <footer className="border-t border-neutral-200 dark:border-[#444748]/30 py-12 text-center text-xs font-mono text-neutral-500 dark:text-[#8e9192]">
+        <footer className="border-t border-neutral-200/80 dark:border-[#444748]/30 py-12 text-center text-xs font-mono text-neutral-600 dark:text-[#8e9192]">
           <div className="max-w-[1440px] mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Image src="/logo.svg" alt="SparkSite Logo" width={20} height={20} className="brightness-110 dark:brightness-125" />
-              <span className="font-['Sora'] font-bold text-neutral-900 dark:text-[#e3e2e2]">SparkSite AI Engine</span>
+            <div className="flex items-center gap-2.5">
+              <Image src="/logo.svg" alt="SparkSite Logo" width={22} height={22} className="brightness-110 dark:brightness-125" />
+              <span className="font-['Sora'] font-bold text-neutral-900 dark:text-[#e3e2e2] text-sm">SparkSite AI Engine</span>
             </div>
-            <div className="flex items-center gap-4">
-              <span>© {new Date().getFullYear()} SparkSite Inc. All rights reserved.</span>
-              <span>•</span>
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-neutral-500 dark:text-neutral-400">© {new Date().getFullYear()} SparkSite Inc. All rights reserved.</span>
+              <span className="text-neutral-300 dark:text-neutral-700">•</span>
               <a
                 href="https://www.linkedin.com/in/vaibhavkumarprince/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#FF6A3D] text-[#090909] dark:text-[#e3e2e2] transition-colors underline underline-offset-4 flex items-center gap-1 font-semibold"
+                className="hover:text-[#FF6A3D] text-neutral-900 dark:text-[#e3e2e2] transition-colors underline underline-offset-4 flex items-center gap-1 font-bold"
               >
                 Made by Vaibhav
               </a>

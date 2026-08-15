@@ -14,14 +14,14 @@
   --primary-foreground: #ffffff;
   --secondary: #FF6A3D;
   --secondary-foreground: #3b0a00;
-  --muted: #f0eee9;
-  --muted-foreground: #666666;
+  --muted: #f4f2ec;
+  --muted-foreground: #475569;
   --accent: #FF6A3D;
   --accent-foreground: #ffffff;
   --destructive: #ba1a1a;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
-  --input: rgba(0, 0, 0, 0.1);
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.08);
   --ring: #FF6A3D;
   --sidebar: #f5f4f0;
   --sidebar-foreground: #090909;
@@ -29,7 +29,7 @@
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #ebe9e4;
   --sidebar-accent-foreground: #090909;
-  --sidebar-border: rgba(0, 0, 0, 0.1);
+  --sidebar-border: rgba(0, 0, 0, 0.08);
   --sidebar-ring: #FF6A3D;
   --radius: 0.75rem;
 }
@@ -118,10 +118,11 @@
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.03);
   color: #090909;
 }
 
@@ -130,6 +131,7 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(38, 38, 38, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
   color: #e3e2e2;
 }
 
