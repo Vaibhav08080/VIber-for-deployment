@@ -21,8 +21,7 @@ import Link from "next/link";
 
 import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
-import { useQuery } from "@tanstack/react-query";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
 export const ProjectView = ({ projectId }: Props) => {

@@ -5,7 +5,6 @@ import { ProjectList } from "@/modules/home/ui/components/project-list";
 import { CinematicBackground } from "@/components/cinematic-background";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function Home() {
   const [parallax, setParallax] = useState({ rotateX: 0, rotateY: 0 });
@@ -34,7 +33,7 @@ export default function Home() {
       {/* Interactive WebGL & Three.js Background */}
       <CinematicBackground />
 
-      <main className="relative pt-[120px] md:pt-[140px] z-10">
+      <main className="relative pt-24 md:pt-28 z-10">
         {/* 1. Hero Experience Section */}
         <section className="max-w-[1440px] mx-auto px-6 md:px-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[640px] pb-16">
           {/* Hero Left Content */}

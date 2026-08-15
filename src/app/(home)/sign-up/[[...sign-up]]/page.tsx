@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { SignUp } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { CinematicBackground } from "@/components/cinematic-background";
