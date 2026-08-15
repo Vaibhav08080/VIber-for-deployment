@@ -39,12 +39,6 @@ export const Navbar = () => {
           Platform
         </Link>
         <Link
-          href="/#prompt-builder"
-          className="text-xs uppercase tracking-widest text-[#525252] dark:text-[#c4c7c7] hover:text-[#090909] dark:hover:text-[#e3e2e2] transition-colors font-medium"
-        >
-          Templates
-        </Link>
-        <Link
           href="/#showcase"
           className="text-xs uppercase tracking-widest text-[#525252] dark:text-[#c4c7c7] hover:text-[#090909] dark:hover:text-[#e3e2e2] transition-colors font-medium"
         >

@@ -277,47 +277,75 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Showcase Card 1 */}
-            <div className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01]">
+            {/* Showcase Card 1 — Ripple Testimonials */}
+            <a
+              href="https://ripple-testimonials.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,106,61,0.15)] cursor-pointer block"
+            >
               <div className="aspect-video relative overflow-hidden">
                 <Image
-                  src="/showcase/aurora.jpg"
-                  alt="Aurora Capital"
+                  src="/Template1.png"
+                  alt="Ripple Testimonials"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500 opacity-90"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/30 to-transparent" />
+                {/* Live badge */}
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+                  <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">Live</span>
+                </div>
               </div>
               <div className="p-8 absolute bottom-0 left-0 right-0 text-white">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF6A3D] bg-[#FF6A3D]/10 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
-                  Fintech
+                  Testimonials
                 </span>
                 <h3 className="font-['Sora'] text-2xl font-bold mt-3 group-hover:text-[#FF6A3D] transition-colors">
-                  AURORA CAPITAL
+                  RIPPLE TESTIMONIALS
                 </h3>
+                <p className="text-xs text-white/50 mt-1 font-mono flex items-center gap-1">
+                  ripple-testimonials.vercel.app
+                  <svg className="size-3 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </p>
               </div>
-            </div>
+            </a>
 
-            {/* Showcase Card 2 */}
-            <div className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.01]">
+            {/* Showcase Card 2 — Glam Cosmetics */}
+            <a
+              href="https://glam-cosmetics-universe-hqlr.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative rounded-2xl border border-neutral-200 dark:border-[#444748]/30 overflow-hidden bg-neutral-900 shadow-xl transition-all hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(255,106,61,0.15)] cursor-pointer block"
+            >
               <div className="aspect-video relative overflow-hidden">
                 <Image
-                  src="/showcase/tempora.jpg"
-                  alt="Tempora Watches"
+                  src="/template2.png"
+                  alt="Glam Cosmetics Universe"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                  className="object-cover object-top group-hover:scale-105 transition-transform duration-500 opacity-90"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/30 to-transparent" />
+                {/* Live badge */}
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+                  <span className="size-1.5 rounded-full bg-green-400 animate-pulse" />
+                  <span className="text-[10px] font-mono text-white/80 uppercase tracking-wider">Live</span>
+                </div>
               </div>
               <div className="p-8 absolute bottom-0 left-0 right-0 text-white">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#FF6A3D] bg-[#FF6A3D]/10 px-3 py-1 rounded-full border border-[#FF6A3D]/30">
-                  Retail
+                  E-Commerce
                 </span>
                 <h3 className="font-['Sora'] text-2xl font-bold mt-3 group-hover:text-[#FF6A3D] transition-colors">
-                  TEMPORA WATCHES
+                  GLAM COSMETICS
                 </h3>
+                <p className="text-xs text-white/50 mt-1 font-mono flex items-center gap-1">
+                  glam-cosmetics-universe-hqlr.vercel.app
+                  <svg className="size-3 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </p>
               </div>
-            </div>
+            </a>
           </div>
         </section>
 
