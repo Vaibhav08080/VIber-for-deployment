@@ -102,3 +102,14 @@ model Usage{
   points Int
   expire DateTime?
 }
+
+model UserSubscription {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  isPro             Boolean  @default(false)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  planType          String   @default("pro")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}

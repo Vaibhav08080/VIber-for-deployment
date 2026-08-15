@@ -21,16 +21,16 @@ import Link from "next/link";
 
 import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
-import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "@tanstack/react-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 
 export const ProjectView = ({ projectId }: Props) => {
-     const {has} =useAuth();
-      const hasProAccess = has?.({plan:"pro"});
+  const trpc = useTRPC();
+  const { data: proData } = useQuery({ ...trpc.usage.isPro.queryOptions() });
+  const hasProAccess = proData?.isPro === true;
   const [activeFragment, SetActiveFragment] = useState<Fragment | null>(null);
   const [tabstate, setTabstate] = useState<"preview" | "code">("preview");
-  const trpc = useTRPC();
 
   const { data: messages } = useSuspenseQuery({
     ...trpc.messages.getMany.queryOptions({ projectId }),
