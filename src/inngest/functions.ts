@@ -1,45 +1,23 @@
-import { openai, createAgent, createTool, createNetwork, type Tool, Message, createState } from "@inngest/agent-kit";
 import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
-import { getSandbox, lastAssistantTextMessageContent, sanitizeClientComponents, autoInstallMissingPackages } from "./utils";
-import { z } from "zod";
-import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "../prompt";
+import { getSandbox, sanitizeClientComponents } from "./utils";
 import { prisma } from "@/lib/db";
 import OpenAI from "openai";
 import { pushFilesToGitHubRepo } from "@/lib/github";
 import { clerkClient } from "@clerk/nextjs/server";
 import { SHADCN_UI_FILES } from "@/lib/shadcn-suite";
-
-interface AgentState{
-  summary: string;
-  files:{[path: string]: string};
-}
-
-async function updateProgress(projectId: string, stepName: string, status: "RUNNING" | "DONE" | "ERROR" = "RUNNING") {
-  if (status === "RUNNING") {
-    await prisma.progressStep.create({
-      data: { projectId, step: stepName, status: "RUNNING" },
-    });
-  } else {
-    await prisma.progressStep.updateMany({
-      where: { projectId, step: stepName, status: "RUNNING" },
-      data: { status },
-    });
-  }
-}
-
-async function completeProgress(projectId: string, stepName: string) {
-  await prisma.progressStep.updateMany({
-    where: { projectId, step: stepName, status: "RUNNING" },
-    data: { status: "DONE" },
-  });
-}
+import { runWebsiteGenerationGraph } from "@/lib/agents/graph";
+import { reportProgress } from "@/lib/agents/utils";
 
 async function cleanupProgress(projectId: string) {
-  await prisma.progressStep.updateMany({
-    where: { projectId, status: "RUNNING" },
-    data: { status: "DONE" },
-  });
+  try {
+    await prisma.progressStep.updateMany({
+      where: { projectId, status: "RUNNING" },
+      data: { status: "DONE" },
+    });
+  } catch (err) {
+    // Non-blocking cleanup
+  }
 }
 
 export const CodeAgentFunction = inngest.createFunction(
@@ -47,6 +25,7 @@ export const CodeAgentFunction = inngest.createFunction(
   { event: "code-agent/run" },
   async ({ event, step }) => {
 
+    // --- DISCUSS Mode: Fast advisory without container modifications ---
     if (event.data.mode === "DISCUSS") {
       const content = await step.run("generate-discuss-response", async () => {
         const messages = await prisma.message.findMany({
@@ -57,7 +36,7 @@ export const CodeAgentFunction = inngest.createFunction(
         const formattedMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
           {
             role: "system",
-            content: `You are an expert AI software architect and senior product designer for an AI web app builder.
+            content: `You are an expert AI software architect and senior product designer for Vibel.
 The user is in DISCUSS mode. They want to ask questions, discuss design ideas, plan features, or troubleshoot without modifying any code files or sandboxes right now.
 Provide clear, structured, technical, and helpful answers. Use bullet points and code snippets where helpful. Keep your response focused on answering their question directly.`,
           },
@@ -116,372 +95,121 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
       };
     }
 
-    // --- Progress: Setting up sandbox ---
+    // --- 1. Provision E2B Sandbox ---
     const SandboxId = await step.run("get-sandbox-id", async () => {
-      await updateProgress(event.data.projectId, "Setting up sandbox...");
+      await reportProgress(event.data.projectId, "Setting up sandbox...", "RUNNING");
       const sandbox = await Sandbox.create("viber-nextjs", {
         timeoutMs: 60 * 60 * 1000,
       });
-      await completeProgress(event.data.projectId, "Setting up sandbox...");
+      await reportProgress(event.data.projectId, "Setting up sandbox...", "DONE");
       return sandbox.sandboxId;
     });
 
- // --- Progress: Loading conversation ---
-  const previousMessages = await step.run("get-previous-messages", async () => {
-    await updateProgress(event.data.projectId, "Loading conversation history...");
-    const formattedMessages: Message[] = [];
-    const messages = await prisma.message.findMany({
-      where: {
-        projectId: event.data.projectId,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 10,
-    });
-    messages.reverse();
-
-    for (const message of messages) {
-      if (message.imageUrl) {
-        formattedMessages.push({
-          type: "text",
-          role: message.role === "ASSISTANT" ? "assistant" : "user",
-          content: [
-            { type: "text", text: message.content },
-            { type: "image_url", image_url: { url: message.imageUrl } }
-          ] as any,
-        });
-      } else {
-        formattedMessages.push({
-          type: "text",
-          role: message.role === "ASSISTANT" ? "assistant" : "user",
-          content: message.content,
-        });
-      }
-    }
-    await completeProgress(event.data.projectId, "Loading conversation history...");
-    return formattedMessages;
-  });
-
-  // --- Hydrate existing project files for follow-up turns ---
-  const existingFiles = await step.run("get-existing-files", async () => {
-    const lastFragment = await prisma.fragment.findFirst({
-      where: {
-        message: {
-          projectId: event.data.projectId,
+    // --- 2. Hydrate Existing Project Files ---
+    const existingFiles = await step.run("get-existing-files", async () => {
+      const lastFragment = await prisma.fragment.findFirst({
+        where: {
+          message: {
+            projectId: event.data.projectId,
+          },
         },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    if (!lastFragment?.files) return {};
-    return lastFragment.files as Record<string, string>;
-  });
-
-  await step.run("hydrate-sandbox-files", async () => {
-    const sandbox = await getSandbox(SandboxId);
-    const allFilesToHydrate = { ...SHADCN_UI_FILES, ...existingFiles };
-    const sanitized = sanitizeClientComponents(allFilesToHydrate);
-    await Promise.all(
-      Object.entries(sanitized).map(async ([path, content]) => {
-        await sandbox.files.write(path, content);
-      })
-    );
-  });
-
-  const State = createState<AgentState>(
-    {
-      summary: "",
-      files: existingFiles,
-    },
-    {
-      messages: previousMessages,
-    }
-  );
-
-  const projectDb = await step.run("get-project-details", async () => {
-    return await prisma.project.findUnique({
-      where: { id: event.data.projectId },
-      select: { supabaseUrl: true, supabaseAnonKey: true },
-    });
-  });
-
-  let systemPrompt = PROMPT;
-  if (projectDb?.supabaseUrl && projectDb?.supabaseAnonKey) {
-    systemPrompt += `\n\nSUPABASE DATABASE CONNECTED:
-This project is connected to the user's live Supabase instance:
-- Supabase URL: "${projectDb.supabaseUrl}"
-- Supabase Anon Key: "${projectDb.supabaseAnonKey}"
-
-You MUST:
-1. Use the terminal tool to install @supabase/supabase-js if needed ("npm install @supabase/supabase-js --yes").
-2. Create a Supabase client helper at "lib/supabase.ts":
-   import { createClient } from "@supabase/supabase-js";
-   export const supabase = createClient("${projectDb.supabaseUrl}", "${projectDb.supabaseAnonKey}");
-3. Use real Supabase client queries (e.g., supabase.from('items').select('*')) for backend/data logic.
-4. Provide a "supabase/schema.sql" file containing the SQL DDL statements (CREATE TABLE, RLS policies) for setting up the user's Supabase tables.
-`;
-  }
-
-  const codeAgent = createAgent<AgentState>({
-    name: "code-agent",
-    description: "An expert coding agent",
-    system: systemPrompt,
-    model: openai({
-      model: "gpt-4o",
-      defaultParameters: {
-        temperature: 0.1,
-      },
-    }),
-      tools: [
-
-        // ✅ FIXED terminal tool
-        createTool({
-          name: "terminal",
-          description: "Use the terminal to run commands",
-          parameters: z.object({
-            command: z.string(),
-          }),
-          handler: async ({ command }, { step }) => {
-            return await step?.run("terminal", async () => {
-              const buffers = { stdout: "", stderr: "" };
-
-              try {
-                const sandbox = await getSandbox(SandboxId);
-                const result = await sandbox.commands.run(command, {
-                  onStdout: (data: string) => {
-                    buffers.stdout += data;
-                  },
-                  onStderr: (data: string) => {
-                    buffers.stderr += data;
-                  },
-                });
-                return result.stdout;
-              } catch (error) {
-                console.error(`Command failed: ${error} \nstdout: ${buffers.stdout}\nstderr: ${buffers.stderr}`);
-                return `Command failed: ${error} \nstdout: ${buffers.stdout}\nstderr: ${buffers.stderr}`;
-              }
-            });
-          }
-        }),
-
-        createTool({
-          name: "createOrupdateFiles",
-          description: "Create or update files in the sandbox",
-          parameters: z.object({
-            files: z.array(
-              z.object({
-                path: z.string(),
-                content: z.string(),
-              })
-            )
-          }),
-          handler: async ({ files }, { step, network } : Tool.Options<AgentState>) => {
-            const newFiles = await step?.run("createOrupdateFiles", async () => {
-              try {
-                const updatedFiles = network.state.data.files || {};
-                const sandbox = await getSandbox(SandboxId);
-                // Self-Healing QA: Auto-insert "use client" header if missing on React client components
-                const rawFileMap: Record<string, string> = {};
-                for (const file of files) {
-                  rawFileMap[file.path] = file.content;
-                }
-                const sanitizedMap = sanitizeClientComponents(rawFileMap);
-
-                await Promise.all(
-                  Object.entries(sanitizedMap).map(async ([filePath, content]) => {
-                    await sandbox.files.write(filePath, content);
-                    updatedFiles[filePath] = content;
-                  })
-                );
-                return updatedFiles;
-              } catch (error) {
-                return "Error:" + error;
-              }
-            });
-
-            if (typeof newFiles === "object") {
-              network.state.data.files = newFiles;
-            }
-
-            return newFiles;
-          }
-        }),
-
-        createTool({
-          name: "readFiles",
-          description: "Read files from the sandbox",
-          parameters: z.object({
-            files: z.array(z.string()),
-          }),
-          handler: async ({ files }, { step }) => {
-            const newFiles = await step?.run("readFiles", async () => {
-              try {
-                const sandbox = await getSandbox(SandboxId);
-                const contents = [];
-                for (const filePath of files) {
-                  const content = await sandbox.files.read(filePath);
-                  contents.push({ path: filePath, content });
-                }
-                return JSON.stringify(contents);
-              } catch (error) {
-                return "Error:" + error;
-              }
-            });
-
-            return newFiles;
-          }
-        }),
-      ],
-      lifecycle: {
-        onResponse: async ({ result, network }) => {
-          const lastAssistantMessageText = lastAssistantTextMessageContent(result);
-          if (lastAssistantMessageText && network) {
-            if (lastAssistantMessageText.includes("<task_summary>")) {
-              network.state.data.summary = lastAssistantMessageText;
-            }
-          }
-          return result;
+        orderBy: {
+          createdAt: "desc",
         },
-      },
+      });
+
+      if (!lastFragment?.files) return {};
+      return lastFragment.files as Record<string, string>;
     });
 
-    const network = createNetwork<AgentState>({
-      name: "coding-agent-network",
-      agents: [codeAgent],
-      maxIter: 15,
-      defaultState: State,
-      router: async ({ network }) => {
-        const summary = network.state.data.summary;
-        if (summary) {
-          return;
-        }
-        return codeAgent;
-      }
-    });
-
-    // --- Progress: AI coding ---
-    await step.run("progress-ai-coding", async () => {
-      await updateProgress(event.data.projectId, "AI is writing your code...");
-    });
-
-    const result = await network.run(event.data.value ,{ state: State});
-
-    await step.run("progress-ai-coding-done", async () => {
-      await completeProgress(event.data.projectId, "AI is writing your code...");
-    });
-
-    // --- Progress: Self-Healing QA Check ---
-    await step.run("qa-self-healing-packages", async () => {
-      await updateProgress(event.data.projectId, "Running QA diagnostics & auto-healing...");
+    await step.run("hydrate-sandbox-files", async () => {
       const sandbox = await getSandbox(SandboxId);
-      if (result.state.data.files) {
-        await autoInstallMissingPackages(sandbox, result.state.data.files);
-      }
-      await completeProgress(event.data.projectId, "Running QA diagnostics & auto-healing...");
+      const allFilesToHydrate = { ...SHADCN_UI_FILES, ...existingFiles };
+      const sanitized = sanitizeClientComponents(allFilesToHydrate);
+      await Promise.all(
+        Object.entries(sanitized).map(async ([path, content]) => {
+          await sandbox.files.write(path, content);
+        })
+      );
     });
 
-    // --- Progress: Generating title & response (Lightweight step, zero token bloat) ---
-    await step.run("progress-generating-title", async () => {
-      await updateProgress(event.data.projectId, "Generating app title...");
+    // --- 3. Get Project Integrations (Supabase / GitHub) ---
+    const projectDb = await step.run("get-project-details", async () => {
+      return await prisma.project.findUnique({
+        where: { id: event.data.projectId },
+        select: { supabaseUrl: true, supabaseAnonKey: true },
+      });
     });
 
-    const titleAndResponse = await step.run("generate-title-and-response", async () => {
-      try {
-        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        const res = await client.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `Generate a JSON object with:
-1. "title": Short 2-3 word title for the app (Title Case, no quotes)
-2. "response": Friendly 1-2 sentence message describing what was built.
-Return ONLY raw JSON with keys "title" and "response".`
-            },
-            {
-              role: "user",
-              content: event.data.value
-            }
-          ],
-          response_format: { type: "json_object" },
-          temperature: 0.2,
-          max_tokens: 150,
-        });
-
-        const parsed = JSON.parse(res.choices[0]?.message?.content || "{}");
-        return {
-          title: parsed.title || "Web Application",
-          response: parsed.response || "Here is your generated web application.",
-        };
-      } catch (err) {
-        return {
-          title: "Web Application",
-          response: "Here is your generated web application.",
-        };
-      }
+    // --- 4. Execute LangGraph Stateful Multi-Agent Pipeline ---
+    const agentResult = await step.run("run-langgraph-multi-agent", async () => {
+      return await runWebsiteGenerationGraph({
+        projectId: event.data.projectId,
+        prompt: event.data.value,
+        imageUrl: event.data.imageUrl,
+        mode: event.data.mode || "BUILD",
+        supabaseUrl: projectDb?.supabaseUrl || undefined,
+        supabaseAnonKey: projectDb?.supabaseAnonKey || undefined,
+        sandboxId: SandboxId,
+        initialFiles: existingFiles,
+      });
     });
 
-    await step.run("progress-generating-title-done", async () => {
-      await completeProgress(event.data.projectId, "Generating app title...");
-    });
-
-    const fileCount = Object.keys(result.state.data.files || {}).length;
-    const isError = fileCount === 0;
-
-    // --- Progress: Building preview ---
+    // --- 5. Determine Sandbox Preview Host ---
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
-      await updateProgress(event.data.projectId, "Building your app preview...");
+      await reportProgress(event.data.projectId, "Building your app preview...", "RUNNING");
       const sandbox = await getSandbox(SandboxId);
       const host = sandbox.getHost(3000);
-      await completeProgress(event.data.projectId, "Building your app preview...");
+      await reportProgress(event.data.projectId, "Building your app preview...", "DONE");
       return `https://${host}`;
     });
 
-    // --- Progress: Saving results ---
-    await step.run("save-results" , async () =>{
-      await updateProgress(event.data.projectId, "Saving results...");
+    // --- 6. Persist Generated Results & Fragment in Database ---
+    const fileCount = Object.keys(agentResult.files || {}).length;
+    const isError = fileCount === 0;
+
+    await step.run("save-results", async () => {
+      await reportProgress(event.data.projectId, "Saving results...", "RUNNING");
 
       if (isError) {
         const msg = await prisma.message.create({
           data: {
             projectId: event.data.projectId,
-            content: "Something went wrong, please try again",
+            content: "Something went wrong during generation. Please try again.",
             role: "ASSISTANT",
             type: "ERROR",
-          }
+          },
         });
         await cleanupProgress(event.data.projectId);
         return msg;
       }
+
       const msg = await prisma.message.create({
-        data:{
+        data: {
           projectId: event.data.projectId,
-          content: titleAndResponse.response,
+          content: agentResult.summary || "Here is your generated web application.",
           role: "ASSISTANT",
           type: "RESULT",
-          fragment:{
-            create:{
+          fragment: {
+            create: {
               sandboxUrl: sandboxUrl,
-              title: titleAndResponse.title,
-              files: result.state.data.files,
-            }
-          }
-        }
+              title: agentResult.title || "Web Application",
+              files: agentResult.files,
+            },
+          },
+        },
       });
 
-      // --- Progress: Auto-sync to GitHub if repo connected ---
+      // --- 7. Auto-sync to GitHub if Repo Connected ---
       const project = await prisma.project.findUnique({
         where: { id: event.data.projectId },
         select: { githubRepo: true, userId: true },
       });
 
-      if (project?.githubRepo && result.state.data.files) {
+      if (project?.githubRepo && agentResult.files) {
         await step.run("sync-github-repo", async () => {
           try {
-            await updateProgress(event.data.projectId, "Syncing code to GitHub...");
+            await reportProgress(event.data.projectId, "Syncing code to GitHub...", "RUNNING");
             const client = await clerkClient();
             const tokens = await client.users.getUserOauthAccessToken(project.userId, "oauth_github");
             const token = tokens.data[0]?.token;
@@ -492,10 +220,10 @@ Return ONLY raw JSON with keys "title" and "response".`
                 token,
                 owner,
                 repo,
-                result.state.data.files,
-                `Auto-sync update from SparkSite AI`
+                agentResult.files,
+                `Auto-sync update from Vibel Multi-Agent Engine`
               );
-              await completeProgress(event.data.projectId, "Syncing code to GitHub...");
+              await reportProgress(event.data.projectId, "Syncing code to GitHub...", "DONE");
             }
           } catch (err) {
             console.error("GitHub auto-sync warning:", err);
@@ -505,13 +233,14 @@ Return ONLY raw JSON with keys "title" and "response".`
 
       await cleanupProgress(event.data.projectId);
       return msg;
-    })
+    });
 
     return {
       url: sandboxUrl,
-      title: titleAndResponse.title,
-      files: result.state.data.files,
-      summary: result.state.data.summary,
+      title: agentResult.title,
+      files: agentResult.files,
+      summary: agentResult.summary,
+      qaScore: agentResult.qaScore,
     };
   }
 );

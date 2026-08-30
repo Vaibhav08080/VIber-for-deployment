@@ -4,14 +4,18 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
-import { CheckCircle2Icon, Loader2Icon, CircleIcon, AlertCircleIcon } from "lucide-react";
+import { CheckCircle2Icon, Loader2Icon, CircleIcon, AlertCircleIcon, SparklesIcon } from "lucide-react";
 
-// Ordered step definitions with icons for upcoming steps
+// Ordered baseline steps for Multi-Agent Autonomous Architecture
 const STEP_ORDER = [
   "Setting up sandbox...",
-  "Loading conversation history...",
-  "AI is writing your code...",
-  "Generating app title...",
+  "Understanding requirements & planning...",
+  "Designing interface & visual system...",
+  "Gathering verified stock assets & docs...",
+  "Architecting full-stack structure & contracts...",
+  "Writing code & assembling application...",
+  "Running browser inspection & visual tests...",
+  "Evaluating quality & UX score...",
   "Building your app preview...",
   "Saving results...",
 ];
@@ -65,18 +69,26 @@ export const MessageLoading = ({ projectId }: MessageLoadingProps) => {
 
   const { data: steps } = useQuery({
     ...trpc.progress.getSteps.queryOptions({ projectId }),
-    refetchInterval: 2000,
+    refetchInterval: 1500,
   });
 
   const progressSteps: ProgressStepData[] = steps ?? [];
 
-  // Build the display: merge DB steps with upcoming steps
-  const completedStepNames = new Set(progressSteps.map((s) => s.step));
+  // Identify running and completed steps
+  const completedStepNames = new Set(progressSteps.filter((s) => s.status === "DONE").map((s) => s.step));
   const runningStep = progressSteps.find((s) => s.status === "RUNNING");
+
+  // Dynamic step display: combine standard steps with any dynamic fix steps
+  const displayedSteps = [...STEP_ORDER];
+  progressSteps.forEach((s) => {
+    if (!displayedSteps.includes(s.step)) {
+      displayedSteps.splice(displayedSteps.length - 2, 0, s.step);
+    }
+  });
 
   // Calculate progress percentage
   const doneCount = progressSteps.filter((s) => s.status === "DONE").length;
-  const totalSteps = STEP_ORDER.length;
+  const totalSteps = Math.max(displayedSteps.length, 1);
   const progressPercent = Math.min(
     Math.round(((doneCount + (runningStep ? 0.5 : 0)) / totalSteps) * 100),
     100
@@ -87,13 +99,14 @@ export const MessageLoading = ({ projectId }: MessageLoadingProps) => {
     return (
       <div className="flex flex-col group px-2 pb-4">
         <div className="flex items-center gap-2 pl-2 mb-2">
-          <Image src="/logo.svg" alt="SparkSite" width={18} height={18} className="shrink-0" />
-          <span className="text-sm font-medium">SparkSite</span>
+          <Image src="/logo.svg" alt="Vibel" width={18} height={18} className="shrink-0" />
+          <span className="text-sm font-medium">Vibel Multi-Agent</span>
         </div>
         <div className="pl-8.5 flex flex-col gap-y-4">
           <div className="flex items-center gap-2">
-            <span className="text-base text-muted-foreground animate-pulse">
-              Preparing your build...
+            <span className="text-base text-muted-foreground animate-pulse flex items-center gap-2">
+              <SparklesIcon className="size-4 animate-spin text-primary" />
+              Initializing multi-agent architecture...
             </span>
           </div>
         </div>
@@ -105,24 +118,24 @@ export const MessageLoading = ({ projectId }: MessageLoadingProps) => {
     <div className="flex flex-col group px-2 pb-4 animate-progress-slide-in">
       {/* Header */}
       <div className="flex items-center gap-2 pl-2 mb-3">
-        <Image src="/logo.svg" alt="SparkSite" width={18} height={18} className="shrink-0" />
-        <span className="text-sm font-semibold animate-progress-pulse">
-          SparkSite is building...
+        <Image src="/logo.svg" alt="Vibel" width={18} height={18} className="shrink-0" />
+        <span className="text-sm font-semibold animate-progress-pulse flex items-center gap-1.5">
+          <SparklesIcon className="size-3.5 text-primary" />
+          Vibel Autonomous Generation...
         </span>
         <ElapsedTimer startTime={startTime} />
       </div>
 
       {/* Progress Steps Card */}
       <div className="ml-8 rounded-xl border border-border/60 bg-card/80 dark:bg-zinc-900/60 backdrop-blur-sm p-4 shadow-sm">
-        <div className="flex flex-col gap-2.5">
-          {STEP_ORDER.map((stepName, index) => {
-            const dbStep = progressSteps.find((s) => s.step === stepName);
+        <div className="flex flex-col gap-2.5 max-h-72 overflow-y-auto pr-1">
+          {displayedSteps.map((stepName, index) => {
+            const dbStep = progressSteps.find((s) => s.step === stepName || s.step.startsWith(stepName.split(" ")[0]));
             let status: "DONE" | "RUNNING" | "ERROR" | "UPCOMING";
 
             if (dbStep) {
               status = dbStep.status as "DONE" | "RUNNING" | "ERROR";
             } else if (completedStepNames.size > 0) {
-              // Show as upcoming if we have some steps but not this one
               status = "UPCOMING";
             } else {
               status = "UPCOMING";
@@ -141,12 +154,12 @@ export const MessageLoading = ({ projectId }: MessageLoadingProps) => {
                     : "text-muted-foreground/40"
                 } ${status !== "UPCOMING" ? "animate-progress-slide-in" : ""}`}
                 style={{
-                  animationDelay: status !== "UPCOMING" ? `${index * 50}ms` : undefined,
+                  animationDelay: status !== "UPCOMING" ? `${index * 40}ms` : undefined,
                 }}
               >
                 <StepIcon status={status} />
                 <span className={status === "RUNNING" ? "animate-progress-pulse" : ""}>
-                  {stepName}
+                  {dbStep?.step || stepName}
                 </span>
                 {status === "DONE" && (
                   <span className="text-[10px] text-emerald-500/70 font-mono ml-auto">done</span>

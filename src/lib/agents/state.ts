@@ -1,0 +1,135 @@
+import { Annotation } from "@langchain/langgraph";
+
+export interface ProductSpec {
+  productType: string;
+  title: string;
+  targetAudience: string[];
+  pages: string[];
+  features: string[];
+  userFlows: string[];
+  keyComponents: string[];
+}
+
+export interface CapabilityManifest {
+  frontend: boolean;
+  backend: boolean;
+  database: boolean;
+  authentication: boolean;
+  payments: boolean;
+  storage: boolean;
+  charts: boolean;
+  aiIntegration: boolean;
+  seo: boolean;
+}
+
+export interface DesignSystem {
+  theme: "dark" | "light" | "system";
+  style: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    background: string;
+    card: string;
+    accent: string;
+    border: string;
+    text: string;
+  };
+  typography: {
+    fontFamily: string;
+    headingScale: string;
+  };
+  tokens: Record<string, string>;
+}
+
+export interface ResourceManifest {
+  images: Array<{ key: string; url: string; alt: string }>;
+  icons: string[];
+  docNotes: string[];
+  mockData: Record<string, any>;
+}
+
+export interface ContentPackage {
+  brandName: string;
+  tagline: string;
+  heroHeadline: string;
+  heroSubheadline: string;
+  ctaText: string;
+  featureHeadlines: Array<{ title: string; description: string }>;
+  testimonialQuotes: Array<{ author: string; role: string; text: string; rating: number }>;
+  faqItems: Array<{ question: string; answer: string }>;
+  seoMeta: { title: string; description: string };
+}
+
+export interface ArchitecturePlan {
+  fileTree: string[];
+  schemaSql?: string;
+  componentContracts: Array<{ path: string; isClient: boolean; description: string }>;
+  stateManagement: string;
+  entryPoint: string;
+}
+
+export interface QAFeedback {
+  overallScore: number;
+  visualScore: number;
+  uxScore: number;
+  responsiveScore: number;
+  functionalScore: number;
+  technicalScore: number;
+  passed: boolean;
+  issues: Array<{
+    severity: "low" | "medium" | "high" | "critical";
+    component: string;
+    description: string;
+    suggestedFix: string;
+  }>;
+}
+
+export const WebsiteStateAnnotation = Annotation.Root({
+  projectId: Annotation<string>,
+  prompt: Annotation<string>,
+  imageUrl: Annotation<string | undefined>,
+  mode: Annotation<"BUILD" | "DISCUSS">,
+  supabaseUrl: Annotation<string | undefined>,
+  supabaseAnonKey: Annotation<string | undefined>,
+  
+  // Agent Artifacts
+  productSpec: Annotation<ProductSpec>,
+  capabilities: Annotation<CapabilityManifest>,
+  designSystem: Annotation<DesignSystem>,
+  resources: Annotation<ResourceManifest>,
+  content: Annotation<ContentPackage>,
+  architecture: Annotation<ArchitecturePlan>,
+  
+  // Sandbox & Filesystem State
+  files: Annotation<Record<string, string>>({
+    reducer: (curr, update) => ({ ...curr, ...update }),
+    default: () => ({}),
+  }),
+  sandboxId: Annotation<string>,
+  sandboxUrl: Annotation<string>,
+  
+  // Browser Inspection & QA
+  screenshots: Annotation<Array<{ viewport: string; dataUrl: string }>>({
+    reducer: (_, update) => update,
+    default: () => [],
+  }),
+  consoleErrors: Annotation<string[]>({
+    reducer: (curr, update) => [...curr, ...update],
+    default: () => [],
+  }),
+  qaReport: Annotation<QAFeedback>,
+  
+  // Iteration & Output
+  iteration: Annotation<number>({
+    reducer: (curr, update) => (update !== undefined ? update : curr + 1),
+    default: () => 0,
+  }),
+  maxIterations: Annotation<number>({
+    reducer: (_, update) => update ?? 2,
+    default: () => 2,
+  }),
+  summary: Annotation<string>,
+  title: Annotation<string>,
+});
+
+export type WebsiteState = typeof WebsiteStateAnnotation.State;

@@ -177,3 +177,40 @@ export async function autoInstallMissingPackages(
 
   return installedPackages;
 }
+
+/**
+ * Ensures the Next.js dev server is actively running on port 3000 in the E2B sandbox.
+ */
+export async function ensureNextjsServerRunning(sandbox: Sandbox): Promise<boolean> {
+  try {
+    const check = await sandbox.commands.run(
+      "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || true",
+      { timeoutMs: 4000 }
+    );
+    const code = check.stdout?.trim();
+    if (code === "200" || code === "304" || code === "307" || code === "308") {
+      return true;
+    }
+
+    console.log(`[E2B] Port 3000 status (${code}). Restarting Next.js dev server...`);
+    await sandbox.commands.run("pkill -f 'next' || true");
+    await sandbox.commands.run("nohup npx next dev --turbopack -p 3000 > /tmp/next.log 2>&1 &");
+    
+    // Wait up to 5 seconds for port to open
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      const verify = await sandbox.commands.run(
+        "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || true",
+        { timeoutMs: 3000 }
+      );
+      const vCode = verify.stdout?.trim();
+      if (vCode === "200" || vCode === "304") {
+        console.log(`[E2B] Next.js dev server is LIVE on port 3000!`);
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn("[E2B] ensureNextjsServerRunning note:", err);
+  }
+  return false;
+}
