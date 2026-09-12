@@ -57,12 +57,14 @@ async function finalizerNode(state: WebsiteState): Promise<Partial<WebsiteState>
  */
 function judgeRouter(state: WebsiteState): "fixAgent" | "finalizer" {
   const currentIter = state.iteration || 0;
-  const maxIter = state.maxIterations || 2;
+  const maxIter = state.maxIterations || 3;
   const score = state.qaReport?.overallScore || 0;
   const passed = state.qaReport?.passed || score >= 8.5;
+  const history = (state.scoreHistory || []).map((s, i) => `Iter ${i}: ${s}`).join(" -> ");
 
   console.log(`\n[ORCHESTRATOR:Router] 🔀 Quality Loop Decision:`);
   console.log(`  ↳ Score: ${score}/10 (threshold: 8.5)`);
+  console.log(`  ↳ History: ${history || score}`);
   console.log(`  ↳ Passed: ${passed}`);
   console.log(`  ↳ Iteration: ${currentIter}/${maxIter}`);
 
@@ -84,7 +86,7 @@ export function buildWebsiteGenerationGraph() {
     .addNode("productPlanner", productPlannerNode)
     .addNode("capabilityPlanner", capabilityPlannerNode)
 
-    // Strategy & Asset Nodes
+    // Strategy & Asset Nodes (Run concurrently after capability planning)
     .addNode("designAgent", designAgentNode)
     .addNode("researchAgent", researchAgentNode)
     .addNode("contentAgent", contentAgentNode)
@@ -102,10 +104,17 @@ export function buildWebsiteGenerationGraph() {
     // Flow Edges
     .addEdge(START, "productPlanner")
     .addEdge("productPlanner", "capabilityPlanner")
+    
+    // Parallel Strategy Fan-Out
     .addEdge("capabilityPlanner", "designAgent")
-    .addEdge("designAgent", "researchAgent")
-    .addEdge("researchAgent", "contentAgent")
+    .addEdge("capabilityPlanner", "researchAgent")
+    .addEdge("capabilityPlanner", "contentAgent")
+
+    // Fan-In to Architecture
+    .addEdge("designAgent", "architectAgent")
+    .addEdge("researchAgent", "architectAgent")
     .addEdge("contentAgent", "architectAgent")
+
     .addEdge("architectAgent", "implementationAgent")
     .addEdge("implementationAgent", "browserRunner")
     .addEdge("browserRunner", "websiteJudge")

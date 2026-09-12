@@ -51,6 +51,7 @@ export async function browserRunnerNode(state: WebsiteState): Promise<Partial<We
 
         const viewports = [
           { name: "desktop", width: 1440, height: 900 },
+          { name: "tablet", width: 768, height: 1024 },
           { name: "mobile", width: 375, height: 667 },
         ];
 
@@ -69,6 +70,10 @@ export async function browserRunnerNode(state: WebsiteState): Promise<Partial<We
 
           page.on("pageerror", (err) => {
             consoleErrors.push(`[PageError ${vp.name}] ${err.message}`);
+          });
+
+          page.on("requestfailed", (request) => {
+            consoleErrors.push(`[Network Error ${vp.name}] ${request.url()} - ${request.failure()?.errorText || "failed"}`);
           });
 
           try {

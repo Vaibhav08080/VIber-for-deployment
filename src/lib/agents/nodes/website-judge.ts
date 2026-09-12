@@ -112,6 +112,17 @@ Return ONLY raw JSON.
     console.log(`     • [${issue.severity}] ${issue.component}: ${issue.description}`);
   });
 
+  // Regression Rollback Check
+  let filesToKeep = state.files;
+  if (state.previousScore !== undefined && state.previousFiles) {
+    const delta = qaReport.overallScore - state.previousScore;
+    console.log(`[AGENT:Judge] 📊 Score delta: ${delta > 0 ? "+" : ""}${delta.toFixed(2)} (prev: ${state.previousScore}, curr: ${qaReport.overallScore})`);
+    if (delta < -0.6) {
+      console.warn(`[AGENT:Judge] ⚠️ Regression detected (${delta.toFixed(2)} drop). Rolling back to pre-fix checkpoint!`);
+      filesToKeep = state.previousFiles;
+    }
+  }
+
   await reportProgress(
     state.projectId,
     `Quality score: ${qaReport.overallScore}/10 ${qaReport.passed ? "✅" : "— needs refinement"}`,
@@ -119,5 +130,9 @@ Return ONLY raw JSON.
   );
   console.log(`[AGENT:Judge] 🏁 Done\n`);
 
-  return { qaReport };
+  return {
+    qaReport,
+    scoreHistory: [qaReport.overallScore],
+    files: filesToKeep,
+  };
 }

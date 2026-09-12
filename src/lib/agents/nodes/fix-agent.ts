@@ -118,5 +118,7 @@ Return ONLY raw JSON.
     files: sanitized,
     iteration: currentIter + 1,
     consoleErrors: [],
+    previousFiles: state.files,
+    previousScore: state.qaReport?.overallScore,
   };
 }

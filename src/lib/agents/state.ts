@@ -118,6 +118,22 @@ export const WebsiteStateAnnotation = Annotation.Root({
     default: () => [],
   }),
   qaReport: Annotation<QAFeedback>,
+  scoreHistory: Annotation<number[]>({
+    reducer: (curr, update) => (update ? [...curr, ...update] : curr),
+    default: () => [],
+  }),
+  previousFiles: Annotation<Record<string, string> | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  previousScore: Annotation<number | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
+  gitCheckpoint: Annotation<string | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
   
   // Iteration & Output
   iteration: Annotation<number>({
@@ -125,8 +141,8 @@ export const WebsiteStateAnnotation = Annotation.Root({
     default: () => 0,
   }),
   maxIterations: Annotation<number>({
-    reducer: (_, update) => update ?? 2,
-    default: () => 2,
+    reducer: (_, update) => update ?? 3,
+    default: () => 3,
   }),
   summary: Annotation<string>,
   title: Annotation<string>,
