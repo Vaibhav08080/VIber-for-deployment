@@ -12,12 +12,12 @@ export async function designAgentNode(state: WebsiteState): Promise<Partial<Webs
 
   const response = await client.chat.completions.create({
     model: "gpt-4o",
-    temperature: 0.3,
+    temperature: 0.7,
     messages: [
       { role: "system", content: DESIGN_AGENT_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Product Spec:\n${JSON.stringify(state.productSpec, null, 2)}\n\nCapabilities:\n${JSON.stringify(state.capabilities, null, 2)}`,
+        content: `Product: "${state.productSpec?.title}" (${state.productSpec?.productType})\nUser Prompt: "${state.prompt}"\nKey Components: ${JSON.stringify(state.productSpec?.keyComponents || [])}\n\nDesign a UNIQUE, distinct visual theme, background, and color palette matching this domain. NEVER repeat the same purple/slate palette.`,
       },
     ],
   });

@@ -27,34 +27,27 @@ export async function implementationAgentNode(state: WebsiteState): Promise<Part
 
   const systemInstruction = `
 You are the Senior Full-Stack Implementation Engineer at Vibel.
-You are generating a complete, production-ready Next.js 15 web application.
+You are generating a complete, highly interactive, production-ready Next.js 15 web application.
 
-CRITICAL: You MUST use ALL data from the "content" and "resources" objects below.
-The content object contains domain-specific copy, brand name, testimonials, FAQs etc.
-generated specifically for this product — DO NOT invent generic placeholder content.
-
-Strict Technical Rules:
+CRITICAL ARCHITECTURE & INTEGRATION RULES:
 1. Entry Point: 'app/page.tsx' MUST be the main page.
-2. Client Components: MUST put "use client"; on the VERY FIRST LINE of 'app/page.tsx' and any component file using useState, useEffect, or event handlers.
-3. Modular Architecture: Create each component file under 'components/*.tsx' EXACTLY as defined in architecture.fileTree.
-4. Styling: Tailwind CSS ONLY. Use designSystem.tokens values verbatim.
-5. Icons: Lucide-react icons — use the exact icon names from resources.icons.
-6. Images: Use verified Unsplash CDN URLs from resources.images. Map keys like "hero", "avatar1", "feature1" to their URLs.
-7. Zero Placeholders: Provide 100% complete code. NEVER write "// TODO", "// rest of code...", or partial implementations.
-8. Use content.brandName, content.heroHeadline, content.testimonialQuotes[], content.faqItems[], content.featureHeadlines[] verbatim.
+2. YOU MUST GENERATE ALL FILES LISTED IN: ${JSON.stringify(state.architecture?.fileTree || [])}
+3. 'app/page.tsx' MUST import and render EVERY single component in architecture.fileTree.
+   - DO NOT skip any component!
+   - DO NOT render empty divs or placeholder links!
+4. Client Directives: MUST put "use client"; on the VERY FIRST LINE of 'app/page.tsx' and any component using useState, useEffect, or event handlers.
+5. Rich Interactivity (MANDATORY):
+   - Every component MUST be feature-complete (60-150 lines of rich JSX each).
+   - Implement real working React state (useState), filter buttons, tabs, calculators, sliders, or modals.
+   - Use real domain data from 'content' and 'resources.mockData' (never write "// TODO" or "// rest of code...").
+6. Styling: Tailwind CSS ONLY. Use designSystem.colors and tokens.
+7. Images & Icons: Use verified Unsplash URLs from resources.images and Lucide icons from resources.icons.
 
-Output MUST be a valid JSON object:
+Output MUST be a valid JSON object matching:
 {
   "files": {
-    "app/page.tsx": "...",
-    "components/navbar.tsx": "...",
-    "components/hero.tsx": "...",
-    "components/features.tsx": "...",
-    "components/interactive-section.tsx": "...",
-    "components/testimonials.tsx": "...",
-    "components/faq.tsx": "...",
-    "components/footer.tsx": "...",
-    "lib/mock-data.ts": "..."
+    "app/page.tsx": "// Full code mounting all components...",
+    // Provide full, complete code for every file in architecture.fileTree
   }
 }
 Return ONLY raw JSON with no markdown fences.
@@ -64,7 +57,8 @@ Return ONLY raw JSON with no markdown fences.
 
   const response = await client.chat.completions.create({
     model: "gpt-4o",
-    temperature: 0.2,
+    temperature: 0.25,
+    max_tokens: 8192,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: systemInstruction },

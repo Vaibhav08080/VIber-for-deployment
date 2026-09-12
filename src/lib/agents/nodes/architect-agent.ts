@@ -27,30 +27,31 @@ export async function architectAgentNode(state: WebsiteState): Promise<Partial<W
       { role: "system", content: ARCHITECT_AGENT_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `System Context:\n${JSON.stringify(context, null, 2)}`,
+        content: `Product: "${state.productSpec?.title}"\nKey Features to Implement as Components: ${JSON.stringify(state.productSpec?.keyComponents || [])}\n\nSystem Context:\n${JSON.stringify(context, null, 2)}\n\nIMPORTANT: Do NOT output generic "features.tsx" or "interactive-section.tsx". Name every component after its exact feature from Key Features above!`,
       },
     ],
   });
 
   const raw = response.choices[0]?.message?.content || "{}";
+
+  // Build dynamic default fileTree from keyComponents if available
+  const dynamicFeatureFiles = (state.productSpec?.keyComponents || [])
+    .filter((k) => !["navbar", "hero", "footer"].includes(k.toLowerCase()))
+    .map((k) => `components/${k.toLowerCase().replace(/[^a-z0-9]/g, "-")}.tsx`);
+
   const defaultArchitecture: ArchitecturePlan = {
     fileTree: [
       "app/page.tsx",
       "components/navbar.tsx",
       "components/hero.tsx",
-      "components/features.tsx",
-      "components/interactive-section.tsx",
-      "components/testimonials.tsx",
-      "components/pricing.tsx",
-      "components/faq.tsx",
+      ...(dynamicFeatureFiles.length > 0 ? dynamicFeatureFiles : ["components/main-feature.tsx"]),
       "components/footer.tsx",
-      "lib/types.ts",
       "lib/mock-data.ts",
     ],
     componentContracts: [
-      { path: "app/page.tsx", isClient: true, description: "Main page" },
+      { path: "app/page.tsx", isClient: true, description: "Main page mounting all components" },
     ],
-    stateManagement: "React useState / zustand",
+    stateManagement: "React useState",
     entryPoint: "app/page.tsx",
   };
 

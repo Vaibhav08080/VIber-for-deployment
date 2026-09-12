@@ -1,6 +1,7 @@
 import { WebsiteState, ResourceManifest } from "../state";
 import { RESEARCH_AGENT_SYSTEM_PROMPT } from "../prompts/system-prompts";
 import { getOpenAIClient, extractAndParseJSON, reportProgress } from "../utils";
+import { getFallbackImageForContext } from "@/lib/image-assets";
 
 export async function researchAgentNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[AGENT:Research] ⚡ Starting...`);
@@ -23,12 +24,16 @@ export async function researchAgentNode(state: WebsiteState): Promise<Partial<We
   });
 
   const raw = response.choices[0]?.message?.content || "{}";
+  const heroFallback = getFallbackImageForContext(`${state.productSpec?.title || ""} ${state.prompt}`, 0);
+  const featFallback = getFallbackImageForContext(`${state.productSpec?.title || ""} ${state.prompt}`, 1);
+
   const defaultResources: ResourceManifest = {
     images: [
-      { key: "hero", url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=80", alt: "Abstract dynamic visual" },
+      { key: "hero", url: heroFallback, alt: `${state.productSpec?.title || "Product"} Hero` },
+      { key: "feature1", url: featFallback, alt: "Feature visual" },
     ],
-    icons: ["Sparkles", "Zap", "Layers", "BarChart3", "ShieldCheck", "ArrowRight", "Star", "Check"],
-    docNotes: ["Use Lucide-react icons", "Use Recharts for metrics"],
+    icons: ["Sparkles", "Zap", "Layers", "Compass", "ShieldCheck", "ArrowRight", "Star", "Check"],
+    docNotes: ["Use Lucide-react icons", "Use Recharts for metrics if needed"],
     mockData: {},
   };
 

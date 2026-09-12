@@ -4,6 +4,30 @@
  */
 
 export const CATEGORY_IMAGE_MAP: Record<string, string[]> = {
+  space: [
+    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&auto=format&fit=crop&q=80", // Earth from space
+    "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=1200&auto=format&fit=crop&q=80", // Space satellite
+    "https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?w=800&auto=format&fit=crop&q=80", // Milky way galaxy
+    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&auto=format&fit=crop&q=80", // Neon futuristic glow
+    "https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?w=800&auto=format&fit=crop&q=80", // Space rocket launch
+  ],
+  travel: [
+    "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1200&auto=format&fit=crop&q=80", // Paris Eiffel Tower
+    "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=1200&auto=format&fit=crop&q=80", // Kyoto Temple
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&auto=format&fit=crop&q=80", // Tropical Beach
+    "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&auto=format&fit=crop&q=80", // Roadtrip Landscape
+  ],
+  ghost: [
+    "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1200&auto=format&fit=crop&q=80", // Misty dark woods
+    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80", // Eerie night aesthetic
+    "https://images.unsplash.com/photo-1514533450685-4493e01d1fdc?w=800&auto=format&fit=crop&q=80", // Old Victorian castle
+    "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&auto=format&fit=crop&q=80", // Antique candlelight
+  ],
+  crypto: [
+    "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=1200&auto=format&fit=crop&q=80", // Crypto coins glow
+    "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&auto=format&fit=crop&q=80", // 3D Web3 Network
+    "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=800&auto=format&fit=crop&q=80", // Cyberpunk Trading
+  ],
   jewelry: [
     "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&auto=format&fit=crop&q=80", // Diamond Ring
     "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&auto=format&fit=crop&q=80", // Gold Necklace
@@ -57,7 +81,15 @@ export function getFallbackImageForContext(text: string, index: number = 0): str
   const lower = text.toLowerCase();
 
   let category = "default";
-  if (lower.includes("ring") || lower.includes("necklace") || lower.includes("jewel") || lower.includes("earring") || lower.includes("gold") || lower.includes("diamond")) {
+  if (lower.includes("space") || lower.includes("alien") || lower.includes("earth") || lower.includes("galaxy") || lower.includes("planet") || lower.includes("voyage") || lower.includes("astro")) {
+    category = "space";
+  } else if (lower.includes("travel") || lower.includes("tour") || lower.includes("trip") || lower.includes("visit") || lower.includes("sight") || lower.includes("hotel")) {
+    category = "travel";
+  } else if (lower.includes("ghost") || lower.includes("spook") || lower.includes("haunt") || lower.includes("horror") || lower.includes("dark") || lower.includes("curse")) {
+    category = "ghost";
+  } else if (lower.includes("crypto") || lower.includes("token") || lower.includes("defi") || lower.includes("swap") || lower.includes("wallet") || lower.includes("coin") || lower.includes("yield")) {
+    category = "crypto";
+  } else if (lower.includes("ring") || lower.includes("necklace") || lower.includes("jewel") || lower.includes("earring") || lower.includes("gold") || lower.includes("diamond")) {
     category = "jewelry";
   } else if (lower.includes("saas") || lower.includes("chart") || lower.includes("dash") || lower.includes("data") || lower.includes("tech") || lower.includes("code")) {
     category = "saas";
