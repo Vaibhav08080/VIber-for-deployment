@@ -1,6 +1,6 @@
 import { WebsiteState, DesignSystem } from "../state";
 import { DESIGN_AGENT_SYSTEM_PROMPT } from "../prompts/system-prompts";
-import { getGeminiClient, extractAndParseJSON, reportProgress } from "../utils";
+import { callRobustChatCompletion, extractAndParseJSON, reportProgress } from "../utils";
 
 export async function designAgentNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[AGENT:Design] ⚡ Starting...`);
@@ -8,11 +8,9 @@ export async function designAgentNode(state: WebsiteState): Promise<Partial<Webs
 
   await reportProgress(state.projectId, "Designing interface & visual system...", "RUNNING");
 
-  const { client, model, isGemini } = getGeminiClient();
-  console.log(`[AGENT:Design] 🎨 Using provider: ${isGemini ? "Google Gemini" : "OpenAI"} (${model})`);
-
-  const response = await client.chat.completions.create({
-    model: isGemini ? "gemini-2.0-flash" : "gpt-4o",
+  const raw = await callRobustChatCompletion({
+    preferredProvider: "gemini",
+    fallbackModel: "gpt-4o",
     temperature: 0.7,
     messages: [
       { role: "system", content: DESIGN_AGENT_SYSTEM_PROMPT },
@@ -22,8 +20,6 @@ export async function designAgentNode(state: WebsiteState): Promise<Partial<Webs
       },
     ],
   });
-
-  const raw = response.choices[0]?.message?.content || "{}";
   const defaultDesign: DesignSystem = {
     theme: "dark",
     style: "Modern Glassmorphism & Cyber Clean",

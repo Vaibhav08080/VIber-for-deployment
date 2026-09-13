@@ -52,6 +52,77 @@ export function getGroqClient(): { client: OpenAI; model: string; isGroq: boolea
   return { client: getOpenAIClient(), model: "gpt-4o-mini", isGroq: false };
 }
 
+export interface RobustChatParams {
+  preferredProvider?: "gemini" | "groq" | "openai";
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[];
+  temperature?: number;
+  response_format?: { type: "json_object" | "text" };
+  max_tokens?: number;
+  fallbackModel?: string;
+}
+
+/**
+ * Executes chat completions with guaranteed fallback to OpenAI if the preferred provider fails.
+ */
+export async function callRobustChatCompletion(params: RobustChatParams): Promise<string> {
+  const {
+    preferredProvider = "openai",
+    messages,
+    temperature = 0.7,
+    response_format,
+    max_tokens,
+    fallbackModel = "gpt-4o",
+  } = params;
+
+  // 1. Try preferred provider
+  if (preferredProvider === "groq") {
+    const groq = getGroqClient();
+    if (groq.isGroq) {
+      try {
+        const res = await groq.client.chat.completions.create({
+          model: groq.model,
+          messages,
+          temperature,
+          response_format: response_format as any,
+          max_tokens,
+        });
+        const content = res.choices[0]?.message?.content;
+        if (content) return content;
+      } catch (err) {
+        console.warn("[AI Gateway] Groq call failed, seamlessly falling back to OpenAI:", (err as any)?.message || err);
+      }
+    }
+  } else if (preferredProvider === "gemini") {
+    const gemini = getGeminiClient();
+    if (gemini.isGemini) {
+      try {
+        const res = await gemini.client.chat.completions.create({
+          model: gemini.model,
+          messages,
+          temperature,
+          response_format: response_format as any,
+          max_tokens,
+        });
+        const content = res.choices[0]?.message?.content;
+        if (content) return content;
+      } catch (err) {
+        console.warn("[AI Gateway] Gemini call failed, seamlessly falling back to OpenAI:", (err as any)?.message || err);
+      }
+    }
+  }
+
+  // 2. Guaranteed OpenAI execution
+  const openai = getOpenAIClient();
+  const res = await openai.chat.completions.create({
+    model: fallbackModel,
+    messages,
+    temperature,
+    response_format: response_format as any,
+    max_tokens,
+  });
+  return res.choices[0]?.message?.content || "";
+}
+
 export interface TavilySearchResult {
   title: string;
   url: string;

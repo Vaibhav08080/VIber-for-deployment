@@ -1,16 +1,14 @@
 import { WebsiteState, ContentPackage } from "../state";
 import { CONTENT_AGENT_SYSTEM_PROMPT } from "../prompts/system-prompts";
-import { getGeminiClient, extractAndParseJSON } from "../utils";
+import { callRobustChatCompletion, extractAndParseJSON } from "../utils";
 
 export async function contentAgentNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[AGENT:Content] ⚡ Starting...`);
   console.log(`[AGENT:Content] Product: "${state.productSpec?.title}"`);
 
-  const { client, model, isGemini } = getGeminiClient();
-  console.log(`[AGENT:Content] 🤖 Using provider: ${isGemini ? "Google Gemini" : "OpenAI"} (${model})`);
-
-  const response = await client.chat.completions.create({
-    model,
+  const raw = await callRobustChatCompletion({
+    preferredProvider: "gemini",
+    fallbackModel: "gpt-4o-mini",
     temperature: 0.3,
     messages: [
       { role: "system", content: CONTENT_AGENT_SYSTEM_PROMPT },
@@ -20,8 +18,6 @@ export async function contentAgentNode(state: WebsiteState): Promise<Partial<Web
       },
     ],
   });
-
-  const raw = response.choices[0]?.message?.content || "{}";
   const defaultContent: ContentPackage = {
     brandName: state.productSpec?.title || "Vibel App",
     tagline: "The modern platform built for high-velocity teams",

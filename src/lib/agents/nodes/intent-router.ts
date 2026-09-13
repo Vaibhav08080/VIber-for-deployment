@@ -1,5 +1,5 @@
 import { WebsiteState } from "../state";
-import { getOpenAIClient, getGeminiClient, reportProgress } from "../utils";
+import { callRobustChatCompletion, reportProgress } from "../utils";
 
 /**
  * Intent Router Node
@@ -66,14 +66,14 @@ export async function intentRouterNode(
   try {
     await reportProgress(state.projectId, "Understanding your request...", "RUNNING");
 
-    const { client, model } = getGeminiClient();
     const recentHistory = (state.conversationHistory || [])
       .slice(-6)
       .map((m) => `${m.role.toUpperCase()}: ${m.content.substring(0, 200)}`)
       .join("\n");
 
-    const response = await client.chat.completions.create({
-      model,
+    const raw = await callRobustChatCompletion({
+      preferredProvider: "groq",
+      fallbackModel: "gpt-4o-mini",
       temperature: 0,
       response_format: { type: "json_object" },
       messages: [
@@ -93,7 +93,6 @@ Return JSON: { "intent": "new_project" | "edit_request", "reason": "brief explan
       ],
     });
 
-    const raw = response.choices[0]?.message?.content || "{}";
     const parsed = JSON.parse(raw);
     const intent: "new_project" | "edit_request" =
       parsed.intent === "edit_request" ? "edit_request" : "new_project";
