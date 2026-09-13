@@ -84,6 +84,21 @@ export interface QAFeedback {
   }>;
 }
 
+export interface ConversationMessage {
+  role: "user" | "assistant";
+  content: string;
+  imageUrl?: string;
+}
+
+export interface CapabilityChoices {
+  authentication: boolean;
+  database: boolean;
+  storage: boolean;
+  payments: boolean;
+  aiFeatures: boolean;
+  backendRequired: boolean;
+}
+
 export const WebsiteStateAnnotation = Annotation.Root({
   projectId: Annotation<string>,
   prompt: Annotation<string>,
@@ -91,6 +106,24 @@ export const WebsiteStateAnnotation = Annotation.Root({
   mode: Annotation<"BUILD" | "DISCUSS">,
   supabaseUrl: Annotation<string | undefined>,
   supabaseAnonKey: Annotation<string | undefined>,
+
+  // Intent detection: determines pipeline routing
+  intent: Annotation<"new_project" | "edit_request">({
+    reducer: (_, update) => update ?? "new_project",
+    default: () => "new_project",
+  }),
+
+  // Last N messages from the conversation (for edit context)
+  conversationHistory: Annotation<ConversationMessage[]>({
+    reducer: (_, update) => update ?? [],
+    default: () => [],
+  }),
+
+  // User's declared backend needs (from capability wizard or AI detection)
+  capabilityChoices: Annotation<CapabilityChoices | undefined>({
+    reducer: (_, update) => update,
+    default: () => undefined,
+  }),
   
   // Agent Artifacts
   productSpec: Annotation<ProductSpec>,

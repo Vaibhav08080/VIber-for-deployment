@@ -75,7 +75,7 @@ export const MessagesContainer = ({projectId , activeFragment , SetActiveFragmen
             </div>
             <div className="relative p-3 pt-1">
                 <div className="absolute -top-6 left-0 right-0 h-6 bg-gradient-to-b from-transparent to-background/70 pointer-events-none"></div>
-                <MessageForm projectId={projectId}/>
+                <MessageForm projectId={projectId} isFirstMessage={messages.length === 0}/>
             </div>
         </div>
        

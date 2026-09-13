@@ -1,15 +1,16 @@
 import { WebsiteState, ContentPackage } from "../state";
 import { CONTENT_AGENT_SYSTEM_PROMPT } from "../prompts/system-prompts";
-import { getOpenAIClient, extractAndParseJSON } from "../utils";
+import { getGeminiClient, extractAndParseJSON } from "../utils";
 
 export async function contentAgentNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[AGENT:Content] ⚡ Starting...`);
   console.log(`[AGENT:Content] Product: "${state.productSpec?.title}"`);
 
-  const client = getOpenAIClient();
+  const { client, model, isGemini } = getGeminiClient();
+  console.log(`[AGENT:Content] 🤖 Using provider: ${isGemini ? "Google Gemini" : "OpenAI"} (${model})`);
 
   const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
+    model,
     temperature: 0.3,
     messages: [
       { role: "system", content: CONTENT_AGENT_SYSTEM_PROMPT },

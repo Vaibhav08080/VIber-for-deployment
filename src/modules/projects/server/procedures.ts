@@ -6,6 +6,7 @@ import { inngest } from "@/inngest/client"
 import { generateSlug } from "random-word-slugs";
 import { TRPCError } from "@trpc/server";
 import { ConsumeCredits } from "@/lib/usage";
+import { getGroqClient } from "@/lib/agents/utils";
 import OpenAI from "openai";
 export const projectsRouter = createTRPCRouter({
     getOne: protectedProcedure
@@ -205,9 +206,9 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             })
         )
         .mutation(async ({ input }) => {
-            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-            const response = await openai.chat.completions.create({
-                model: "gpt-4o-mini",
+            const { client: aiClient, model: aiModel } = getGroqClient();
+            const response = await aiClient.chat.completions.create({
+                model: aiModel,
                 messages: [
                     {
                         role: "system",
@@ -236,4 +237,37 @@ STRICT ENVIRONMENT & ARCHITECTURE CONSTRAINTS:
             }
             return { enhanced };
         }),
-        })
+    saveCapabilityChoices: protectedProcedure
+        .input(
+            z.object({
+                projectId: z.string().min(1),
+                choices: z.object({
+                    authentication: z.boolean(),
+                    database: z.boolean(),
+                    storage: z.boolean(),
+                    payments: z.boolean(),
+                    aiFeatures: z.boolean(),
+                    backendRequired: z.boolean(),
+                }),
+                supabaseUrl: z.string().url().optional(),
+                supabaseAnonKey: z.string().optional(),
+            })
+        )
+        .mutation(async ({ input, ctx }) => {
+            const project = await prisma.project.findUnique({
+                where: { id: input.projectId, userId: ctx.auth.userId },
+            });
+            if (!project) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Project not found" });
+            }
+
+            return await prisma.project.update({
+                where: { id: input.projectId },
+                data: {
+                    capabilityChoices: input.choices,
+                    ...(input.supabaseUrl ? { supabaseUrl: input.supabaseUrl } : {}),
+                    ...(input.supabaseAnonKey ? { supabaseAnonKey: input.supabaseAnonKey } : {}),
+                },
+            });
+        }),
+    })

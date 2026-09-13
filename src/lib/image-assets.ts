@@ -108,3 +108,53 @@ export function getFallbackImageForContext(text: string, index: number = 0): str
   const pool = CATEGORY_IMAGE_MAP[category] || CATEGORY_IMAGE_MAP.default;
   return pool[index % pool.length];
 }
+
+/**
+ * Searches Unsplash API for live, high-resolution royalty-free photos matching the topic.
+ * Falls back to curated static URLs if API key is not present or query fails.
+ */
+export async function fetchLiveUnsplashImages(query: string, count: number = 4): Promise<Array<{ url: string; alt: string }>> {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey || accessKey.trim() === "") {
+    return Array.from({ length: count }).map((_, i) => ({
+      url: getFallbackImageForContext(query, i),
+      alt: `${query} visual ${i + 1}`,
+    }));
+  }
+
+  try {
+    const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${count}&orientation=landscape`;
+    const res = await fetch(url, {
+      headers: {
+        Authorization: `Client-ID ${accessKey.trim()}`,
+      },
+    });
+
+    if (!res.ok) {
+      console.warn(`[Unsplash] API returned ${res.status}: ${res.statusText}`);
+      return Array.from({ length: count }).map((_, i) => ({
+        url: getFallbackImageForContext(query, i),
+        alt: `${query} visual ${i + 1}`,
+      }));
+    }
+
+    const data = await res.json();
+    if (!data.results || data.results.length === 0) {
+      return Array.from({ length: count }).map((_, i) => ({
+        url: getFallbackImageForContext(query, i),
+        alt: `${query} visual ${i + 1}`,
+      }));
+    }
+
+    return data.results.map((photo: any) => ({
+      url: photo.urls?.regular || photo.urls?.small,
+      alt: photo.alt_description || photo.description || `${query} photography`,
+    }));
+  } catch (err) {
+    console.warn("[Unsplash] Search failed:", err);
+    return Array.from({ length: count }).map((_, i) => ({
+      url: getFallbackImageForContext(query, i),
+      alt: `${query} visual ${i + 1}`,
+    }));
+  }
+}

@@ -4,24 +4,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextareaAutosize from "react-textarea-autosize";
 import { ArrowUpIcon, Loader2Icon, SparklesIcon, PaperclipIcon, XIcon } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { toast } from 'sonner';
 import { Usage } from "./usage";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Hint } from "./hint";
 import { SpeechRecognitionButton } from "@/components/speech-recognition-button";
-
+import { CapabilityWizard, CapabilitySelections } from "./capability-wizard";
 import { useUser } from "@clerk/nextjs";
 import { compressImage } from "@/lib/compress-image";
 
 interface Props {
   projectId: string;
+  isFirstMessage?: boolean; // true when no messages exist yet
 }
+
 
 const FormSchema = z.object({
   value: z
@@ -30,7 +31,7 @@ const FormSchema = z.object({
     .max(10000, { message: "Value is too long" }),
 });
 
-export const MessageForm = ({ projectId }: Props) => {
+export const MessageForm = ({ projectId, isFirstMessage = false }: Props) => {
     const trpc = useTRPC();
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -38,6 +39,9 @@ export const MessageForm = ({ projectId }: Props) => {
     const [imageDataUrl, setImageDataUrl] = useState<string | null>(null);
     const [mode, setMode] = useState<"BUILD" | "DISCUSS">("BUILD");
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showWizard, setShowWizard] = useState(false);
+    const [pendingSubmitValues, setPendingSubmitValues] = useState<z.infer<typeof FormSchema> | null>(null);
+    const [capabilityChoices, setCapabilityChoices] = useState<CapabilitySelections | null>(null);
 
     const { data: usage } = useQuery({
       ...trpc.usage.status.queryOptions(),
@@ -114,7 +118,50 @@ export const MessageForm = ({ projectId }: Props) => {
         },
     }));
 
+    const handleWizardComplete = async (choices: CapabilitySelections) => {
+        setCapabilityChoices(choices);
+        setShowWizard(false);
+        const values = pendingSubmitValues || form.getValues();
+        if (values.value) {
+            await CreateMessage.mutateAsync({
+                value: values.value,
+                projectId,
+                imageUrl: imageDataUrl || undefined,
+                mode,
+            });
+            setPendingSubmitValues(null);
+        }
+    };
+
+    const handleWizardSkip = async () => {
+        setCapabilityChoices({
+            authentication: false,
+            database: false,
+            storage: false,
+            payments: false,
+            aiFeatures: false,
+            frontendOnly: true,
+        });
+        setShowWizard(false);
+        const values = pendingSubmitValues || form.getValues();
+        if (values.value) {
+            await CreateMessage.mutateAsync({
+                value: values.value,
+                projectId,
+                imageUrl: imageDataUrl || undefined,
+                mode,
+            });
+            setPendingSubmitValues(null);
+        }
+    };
+
     const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+        // On the first BUILD message, show the capability wizard before generating
+        if (isFirstMessage && mode === "BUILD" && !capabilityChoices) {
+            setPendingSubmitValues(values);
+            setShowWizard(true);
+            return;
+        }
         await CreateMessage.mutateAsync({
             value: values.value,
             projectId,
@@ -314,6 +361,13 @@ export const MessageForm = ({ projectId }: Props) => {
                     </Button>
                 </div>
             </form>
+
+            <CapabilityWizard
+                projectId={projectId}
+                open={showWizard}
+                onComplete={handleWizardComplete}
+                onSkip={handleWizardSkip}
+            />
         </Form>
     );
 };

@@ -8,6 +8,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { SHADCN_UI_FILES } from "@/lib/shadcn-suite";
 import { runWebsiteGenerationGraph } from "@/lib/agents/graph";
 import { reportProgress } from "@/lib/agents/utils";
+import { sendWebsiteReadyEmail } from "@/lib/email";
 
 async function cleanupProgress(projectId: string) {
   try {
@@ -137,7 +138,7 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
     const projectDb = await step.run("get-project-details", async () => {
       return await prisma.project.findUnique({
         where: { id: event.data.projectId },
-        select: { supabaseUrl: true, supabaseAnonKey: true },
+        select: { supabaseUrl: true, supabaseAnonKey: true, capabilityChoices: true },
       });
     });
 
@@ -152,8 +153,11 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
         supabaseAnonKey: projectDb?.supabaseAnonKey || undefined,
         sandboxId: SandboxId,
         initialFiles: existingFiles,
+        conversationHistory: event.data.conversationHistory || [],   // NEW: edit context
+        capabilityChoices: (projectDb?.capabilityChoices as any) || event.data.capabilityChoices || undefined, // NEW: backend prefs
       });
     });
+
 
     // --- 5. Determine Sandbox Preview Host ---
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
@@ -227,6 +231,27 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             }
           } catch (err) {
             console.error("GitHub auto-sync warning:", err);
+          }
+        });
+      }
+
+      // --- 8. Send Resend Email Notification (if configured) ---
+      if (project?.userId) {
+        await step.run("send-completion-email", async () => {
+          try {
+            const client = await clerkClient();
+            const user = await client.users.getUser(project.userId);
+            const userEmail = user.emailAddresses?.[0]?.emailAddress;
+            if (userEmail) {
+              await sendWebsiteReadyEmail({
+                to: userEmail,
+                projectName: agentResult.title || "Web Application",
+                previewUrl: sandboxUrl,
+                summary: agentResult.summary,
+              });
+            }
+          } catch (emailErr) {
+            console.warn("[Email] Notification warning:", emailErr);
           }
         });
       }

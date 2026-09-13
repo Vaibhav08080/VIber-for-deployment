@@ -1,13 +1,27 @@
 import { WebsiteState, ResourceManifest } from "../state";
 import { RESEARCH_AGENT_SYSTEM_PROMPT } from "../prompts/system-prompts";
-import { getOpenAIClient, extractAndParseJSON, reportProgress } from "../utils";
-import { getFallbackImageForContext } from "@/lib/image-assets";
+import { getOpenAIClient, extractAndParseJSON, reportProgress, searchTavily } from "../utils";
+import { getFallbackImageForContext, fetchLiveUnsplashImages } from "@/lib/image-assets";
 
 export async function researchAgentNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[AGENT:Research] ⚡ Starting...`);
   console.log(`[AGENT:Research] Product: "${state.productSpec?.title}"`);
 
   await reportProgress(state.projectId, "Gathering verified stock assets & docs...", "RUNNING");
+
+  // 1. Live Tavily web search for domain & UI design context if enabled
+  let searchContext = "";
+  try {
+    const searchQuery = `${state.productSpec?.title || state.prompt} modern web design ui patterns best features`;
+    console.log(`[AGENT:Research] 🌐 Searching Tavily for: "${searchQuery}"...`);
+    const tavilyResults = await searchTavily(searchQuery, 3);
+    if (tavilyResults.length > 0) {
+      console.log(`[AGENT:Research] ✅ Retrieved ${tavilyResults.length} live web results from Tavily`);
+      searchContext = `\n\nLive Web Research:\n` + tavilyResults.map((r, i) => `${i + 1}. ${r.title}\n${r.content.substring(0, 300)}...`).join("\n\n");
+    }
+  } catch (tavilyErr) {
+    console.warn("[AGENT:Research] Tavily search skipped:", tavilyErr);
+  }
 
   const client = getOpenAIClient();
 
@@ -18,26 +32,35 @@ export async function researchAgentNode(state: WebsiteState): Promise<Partial<We
       { role: "system", content: RESEARCH_AGENT_SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Product Spec:\n${JSON.stringify(state.productSpec, null, 2)}\n\nCapabilities:\n${JSON.stringify(state.capabilities, null, 2)}`,
+        content: `Product Spec:\n${JSON.stringify(state.productSpec, null, 2)}\n\nCapabilities:\n${JSON.stringify(state.capabilities, null, 2)}${searchContext}`,
       },
     ],
   });
 
   const raw = response.choices[0]?.message?.content || "{}";
-  const heroFallback = getFallbackImageForContext(`${state.productSpec?.title || ""} ${state.prompt}`, 0);
-  const featFallback = getFallbackImageForContext(`${state.productSpec?.title || ""} ${state.prompt}`, 1);
+
+  // 2. Fetch live Unsplash photos matching the product domain
+  const imageSearchTerm = state.productSpec?.title || state.prompt;
+  const liveImages = await fetchLiveUnsplashImages(imageSearchTerm, 4);
 
   const defaultResources: ResourceManifest = {
     images: [
-      { key: "hero", url: heroFallback, alt: `${state.productSpec?.title || "Product"} Hero` },
-      { key: "feature1", url: featFallback, alt: "Feature visual" },
+      { key: "hero", url: liveImages[0]?.url || getFallbackImageForContext(imageSearchTerm, 0), alt: liveImages[0]?.alt || `${state.productSpec?.title || "Product"} Hero` },
+      { key: "feature1", url: liveImages[1]?.url || getFallbackImageForContext(imageSearchTerm, 1), alt: liveImages[1]?.alt || "Feature visual 1" },
+      { key: "feature2", url: liveImages[2]?.url || getFallbackImageForContext(imageSearchTerm, 2), alt: liveImages[2]?.alt || "Feature visual 2" },
+      { key: "feature3", url: liveImages[3]?.url || getFallbackImageForContext(imageSearchTerm, 3), alt: liveImages[3]?.alt || "Feature visual 3" },
     ],
     icons: ["Sparkles", "Zap", "Layers", "Compass", "ShieldCheck", "ArrowRight", "Star", "Check"],
     docNotes: ["Use Lucide-react icons", "Use Recharts for metrics if needed"],
     mockData: {},
   };
 
-  const resources = extractAndParseJSON<ResourceManifest>(raw, defaultResources);
+  const parsed = extractAndParseJSON<ResourceManifest>(raw, defaultResources);
+  // Ensure images are populated with high quality verified URLs
+  const resources: ResourceManifest = {
+    ...parsed,
+    images: (parsed.images && parsed.images.length > 0) ? parsed.images : defaultResources.images,
+  };
 
   console.log(`[AGENT:Research] ✅ Resources found:`);
   console.log(`  ↳ images: ${resources.images?.length || 0}`);

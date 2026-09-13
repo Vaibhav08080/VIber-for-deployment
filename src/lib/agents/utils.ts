@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { prisma } from "@/lib/db";
 
 let openaiClient: OpenAI | null = null;
+let geminiClient: OpenAI | null = null;
 
 export function getOpenAIClient(): OpenAI {
   if (!openaiClient) {
@@ -10,6 +11,88 @@ export function getOpenAIClient(): OpenAI {
     });
   }
   return openaiClient;
+}
+
+/**
+ * Returns a Gemini-powered client using Google's official OpenAI-compatible endpoint.
+ * Falls back to OpenAI if GOOGLE_API_KEY / GEMINI_API_KEY is not configured.
+ */
+export function getGeminiClient(): { client: OpenAI; model: string; isGemini: boolean } {
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  if (geminiKey && geminiKey.trim() !== "") {
+    if (!geminiClient) {
+      geminiClient = new OpenAI({
+        apiKey: geminiKey.trim(),
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+      });
+    }
+    return { client: geminiClient, model: "gemini-2.0-flash", isGemini: true };
+  }
+  // Fallback to OpenAI
+  return { client: getOpenAIClient(), model: "gpt-4o-mini", isGemini: false };
+}
+
+let groqClient: OpenAI | null = null;
+
+/**
+ * Returns a Groq-powered client for ultra-fast inference (Llama 3.3 70B @ 500+ tokens/sec).
+ * Falls back to Gemini or OpenAI if GROQ_API_KEY is not configured.
+ */
+export function getGroqClient(): { client: OpenAI; model: string; isGroq: boolean } {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (groqKey && groqKey.trim() !== "") {
+    if (!groqClient) {
+      groqClient = new OpenAI({
+        apiKey: groqKey.trim(),
+        baseURL: "https://api.groq.com/openai/v1",
+      });
+    }
+    return { client: groqClient, model: "llama-3.3-70b-versatile", isGroq: true };
+  }
+  return { client: getOpenAIClient(), model: "gpt-4o-mini", isGroq: false };
+}
+
+export interface TavilySearchResult {
+  title: string;
+  url: string;
+  content: string;
+}
+
+/**
+ * Performs live web search using Tavily AI Search API.
+ * Returns relevant web results or empty array if key is missing or search fails.
+ */
+export async function searchTavily(query: string, maxResults: number = 5): Promise<TavilySearchResult[]> {
+  const apiKey = process.env.TAVILY_API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    return [];
+  }
+  try {
+    const res = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        api_key: apiKey.trim(),
+        query,
+        search_depth: "basic",
+        include_answer: true,
+        max_results: maxResults,
+      }),
+    });
+    if (!res.ok) {
+      console.warn(`[Tavily] Search response not OK: ${res.status} ${res.statusText}`);
+      return [];
+    }
+    const data = await res.json();
+    return (data.results || []).map((r: any) => ({
+      title: r.title || "",
+      url: r.url || "",
+      content: r.content || "",
+    }));
+  } catch (err) {
+    console.warn("[Tavily] Search error:", err);
+    return [];
+  }
 }
 
 /**

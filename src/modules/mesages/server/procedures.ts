@@ -142,16 +142,31 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             }
 
             // BUILD mode: trigger Inngest for code generation
+            // Fetch recent conversation history so the agent pipeline knows what's already been built
+            const recentMessages = await prisma.message.findMany({
+                where: { projectId: input.projectId },
+                orderBy: { createdAt: "asc" },
+                take: 10,
+                select: { role: true, content: true, imageUrl: true },
+            });
+
+            const conversationHistory = recentMessages.map((m) => ({
+                role: (m.role === "ASSISTANT" ? "assistant" : "user") as "user" | "assistant",
+                content: m.content,
+                imageUrl: m.imageUrl ?? undefined,
+            }));
+
             await inngest.send({
                 name: "code-agent/run",
-                    data: {
-                      value: input.value,
-                      projectId: input.projectId,
-                      mode: input.mode,
-                    },
-
-                });
-                return CreatedMessage;
+                data: {
+                    value: input.value,
+                    projectId: input.projectId,
+                    mode: input.mode,
+                    imageUrl: input.imageUrl,        // FIX: was silently dropped
+                    conversationHistory,             // FIX: passes edit context to agents
+                },
+            });
+            return CreatedMessage;
         
             })
         })

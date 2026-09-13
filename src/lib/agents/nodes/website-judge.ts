@@ -85,19 +85,33 @@ Return ONLY raw JSON.
 
   const raw = response.choices[0]?.message?.content || "{}";
   const defaultQA: QAFeedback = {
-    overallScore: state.consoleErrors.length > 0 ? 7.2 : 8.8,
-    visualScore: 8.8,
-    uxScore: 8.7,
-    responsiveScore: 8.6,
-    functionalScore: 8.8,
-    technicalScore: state.consoleErrors.length > 0 ? 7.0 : 9.0,
-    passed: state.consoleErrors.length === 0,
-    issues: state.consoleErrors.map((err) => ({
-      severity: "high" as const,
-      component: "Runtime",
-      description: err,
-      suggestedFix: "Resolve runtime error",
-    })),
+    // Conservative fallback when no screenshots are available (Playwright unavailable)
+    // Previously this was 8.8/passed:true which caused the fix loop to never run.
+    // Now we assign a conservative score so the fix agent always runs at least once.
+    overallScore: state.consoleErrors.length > 0 ? 5.0 : 6.5,
+    visualScore: 6.5,
+    uxScore: 6.5,
+    responsiveScore: 6.5,
+    functionalScore: state.consoleErrors.length > 0 ? 5.0 : 7.0,
+    technicalScore: state.consoleErrors.length > 0 ? 5.0 : 7.0,
+    passed: false, // NEVER auto-pass without visual screenshot evidence
+    issues: [
+      ...(state.consoleErrors.length > 0
+        ? state.consoleErrors.map((err) => ({
+            severity: "high" as const,
+            component: "Runtime",
+            description: err,
+            suggestedFix: "Resolve runtime error",
+          }))
+        : []),
+      {
+        severity: "medium" as const,
+        component: "Judge",
+        description: "No visual screenshots captured — conservative score assigned. Fix agent will run to improve quality.",
+        suggestedFix: "Playwright browser inspection required for full visual scoring",
+      },
+    ],
+
   };
 
   const qaReport = extractAndParseJSON<QAFeedback>(raw, defaultQA);

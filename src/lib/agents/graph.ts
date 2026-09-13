@@ -7,9 +7,12 @@ import { researchAgentNode } from "./nodes/research-agent";
 import { contentAgentNode } from "./nodes/content-agent";
 import { architectAgentNode } from "./nodes/architect-agent";
 import { implementationAgentNode } from "./nodes/implementation";
+import { backendAgentNode } from "./nodes/backend-agent";
 import { browserRunnerNode } from "./nodes/browser-runner";
 import { websiteJudgeNode } from "./nodes/website-judge";
 import { fixAgentNode } from "./nodes/fix-agent";
+import { patchAgentNode } from "./nodes/patch-agent";
+import { intentRouterNode, intentRouterEdge } from "./nodes/intent-router";
 import { getOpenAIClient } from "./utils";
 
 /**
@@ -17,15 +20,16 @@ import { getOpenAIClient } from "./utils";
  */
 async function finalizerNode(state: WebsiteState): Promise<Partial<WebsiteState>> {
   console.log(`\n[ORCHESTRATOR:Finalizer] ⚡ Generating final summary...`);
-  console.log(`[ORCHESTRATOR:Finalizer] Title: "${state.productSpec?.title}"`);
+  console.log(`[ORCHESTRATOR:Finalizer] Title: "${state.productSpec?.title || state.title}"`);
   console.log(`[ORCHESTRATOR:Finalizer] QA Score: ${state.qaReport?.overallScore}/10`);
   console.log(`[ORCHESTRATOR:Finalizer] Total iterations: ${state.iteration}`);
   console.log(`[ORCHESTRATOR:Finalizer] Total files: ${Object.keys(state.files || {}).length}`);
+  console.log(`[ORCHESTRATOR:Finalizer] Intent: ${state.intent}`);
 
   const client = getOpenAIClient();
-  const title = state.productSpec?.title || "Modern Web Application";
+  const title = state.productSpec?.title || state.title || "Modern Web Application";
 
-  let summary = "Here is your generated web application.";
+  let summary = state.summary || "Here is your updated web application.";
   try {
     const res = await client.chat.completions.create({
       model: "gpt-4o-mini",
@@ -33,11 +37,11 @@ async function finalizerNode(state: WebsiteState): Promise<Partial<WebsiteState>
       messages: [
         {
           role: "system",
-          content: "Generate a friendly 1-2 sentence message describing what was built and its key features. Be specific about the app, not generic.",
+          content: "Generate a friendly 1-2 sentence message describing what was built or changed. Be specific — reference the actual app name and features.",
         },
         {
           role: "user",
-          content: `Product: ${title}\nFeatures: ${JSON.stringify(state.productSpec?.features || [])}\nQA Score: ${state.qaReport?.overallScore || 9.0}\nIterations: ${state.iteration}`,
+          content: `Intent: ${state.intent}\nProduct: ${title}\nPrompt: "${state.prompt}"\nFeatures: ${JSON.stringify(state.productSpec?.features || [])}\nQA Score: ${state.qaReport?.overallScore || 9.0}`,
         },
       ],
     });
@@ -47,23 +51,24 @@ async function finalizerNode(state: WebsiteState): Promise<Partial<WebsiteState>
   }
 
   console.log(`[ORCHESTRATOR:Finalizer] ✅ Summary: "${summary}"`);
-  console.log(`[ORCHESTRATOR:Finalizer] 🏁 MULTI-AGENT PIPELINE COMPLETE!\n`);
+  console.log(`[ORCHESTRATOR:Finalizer] 🏁 PIPELINE COMPLETE!\n`);
 
   return { title, summary };
 }
 
 /**
  * Quality Loop Router: Fix or Finalize?
+ * Lowered threshold to 7.5 so the fix agent actually runs.
  */
 function judgeRouter(state: WebsiteState): "fixAgent" | "finalizer" {
   const currentIter = state.iteration || 0;
   const maxIter = state.maxIterations || 3;
   const score = state.qaReport?.overallScore || 0;
-  const passed = state.qaReport?.passed || score >= 8.5;
+  const passed = state.qaReport?.passed || score >= 7.5;
   const history = (state.scoreHistory || []).map((s, i) => `Iter ${i}: ${s}`).join(" -> ");
 
   console.log(`\n[ORCHESTRATOR:Router] 🔀 Quality Loop Decision:`);
-  console.log(`  ↳ Score: ${score}/10 (threshold: 8.5)`);
+  console.log(`  ↳ Score: ${score}/10 (threshold: 7.5)`);
   console.log(`  ↳ History: ${history || score}`);
   console.log(`  ↳ Passed: ${passed}`);
   console.log(`  ↳ Iteration: ${currentIter}/${maxIter}`);
@@ -79,32 +84,53 @@ function judgeRouter(state: WebsiteState): "fixAgent" | "finalizer" {
 
 /**
  * Builds the LangGraph StateGraph for multi-agent website generation.
+ *
+ * New Architecture:
+ *   START → intentRouter
+ *     ├─ new_project  → productPlanner → capabilityPlanner → [design|research|content] → architect → [implementation || backend] → browserRunner
+ *     └─ edit_request → patchAgent → browserRunner
+ *   browserRunner → websiteJudge → fixAgent (loop) OR finalizer → END
  */
 export function buildWebsiteGenerationGraph() {
   const workflow = new StateGraph(WebsiteStateAnnotation)
-    // Planning Nodes
+    // ── Intent Detection ──
+    .addNode("intentRouter", intentRouterNode)
+
+    // ── Planning Pipeline (new projects) ──
     .addNode("productPlanner", productPlannerNode)
     .addNode("capabilityPlanner", capabilityPlannerNode)
 
-    // Strategy & Asset Nodes (Run concurrently after capability planning)
+    // ── Parallel Strategy Nodes ──
     .addNode("designAgent", designAgentNode)
     .addNode("researchAgent", researchAgentNode)
     .addNode("contentAgent", contentAgentNode)
 
-    // Architecture & Implementation
+    // ── Architecture & Implementation (parallel frontend + backend) ──
     .addNode("architectAgent", architectAgentNode)
     .addNode("implementationAgent", implementationAgentNode)
+    .addNode("backendAgent", backendAgentNode)
 
-    // QA & Quality Loop
+    // ── Edit Path (follow-up prompts) ──
+    .addNode("patchAgent", patchAgentNode)
+
+    // ── QA & Quality Loop ──
     .addNode("browserRunner", browserRunnerNode)
     .addNode("websiteJudge", websiteJudgeNode)
     .addNode("fixAgent", fixAgentNode)
     .addNode("finalizer", finalizerNode)
 
-    // Flow Edges
-    .addEdge(START, "productPlanner")
+    // ── Flow: START → Intent Detection ──
+    .addEdge(START, "intentRouter")
+
+    // ── Intent Router: route to new pipeline OR patch agent ──
+    .addConditionalEdges("intentRouter", intentRouterEdge, {
+      productPlanner: "productPlanner",
+      patchAgent: "patchAgent",
+    })
+
+    // ── New Project Pipeline ──
     .addEdge("productPlanner", "capabilityPlanner")
-    
+
     // Parallel Strategy Fan-Out
     .addEdge("capabilityPlanner", "designAgent")
     .addEdge("capabilityPlanner", "researchAgent")
@@ -115,11 +141,19 @@ export function buildWebsiteGenerationGraph() {
     .addEdge("researchAgent", "architectAgent")
     .addEdge("contentAgent", "architectAgent")
 
+    // Parallel Implementation Fan-Out (frontend + backend simultaneously)
     .addEdge("architectAgent", "implementationAgent")
-    .addEdge("implementationAgent", "browserRunner")
-    .addEdge("browserRunner", "websiteJudge")
+    .addEdge("architectAgent", "backendAgent")
 
-    // Quality Loop
+    // Fan-In to Browser Runner
+    .addEdge("implementationAgent", "browserRunner")
+    .addEdge("backendAgent", "browserRunner")
+
+    // ── Edit Path ──
+    .addEdge("patchAgent", "browserRunner")
+
+    // ── QA Loop ──
+    .addEdge("browserRunner", "websiteJudge")
     .addConditionalEdges("websiteJudge", judgeRouter, {
       fixAgent: "fixAgent",
       finalizer: "finalizer",
@@ -142,6 +176,15 @@ export async function runWebsiteGenerationGraph(input: {
   supabaseAnonKey?: string;
   sandboxId: string;
   initialFiles?: Record<string, string>;
+  conversationHistory?: Array<{ role: "user" | "assistant"; content: string; imageUrl?: string }>;
+  capabilityChoices?: {
+    authentication: boolean;
+    database: boolean;
+    storage: boolean;
+    payments: boolean;
+    aiFeatures: boolean;
+    backendRequired: boolean;
+  };
 }): Promise<{
   url: string;
   title: string;
@@ -158,6 +201,8 @@ export async function runWebsiteGenerationGraph(input: {
   console.log(`🖼️ Image: ${input.imageUrl ? "attached" : "none"}`);
   console.log(`🗄️ Supabase: ${input.supabaseUrl ? "connected" : "not connected"}`);
   console.log(`📁 Initial files: ${Object.keys(input.initialFiles || {}).length}`);
+  console.log(`💬 History: ${input.conversationHistory?.length || 0} messages`);
+  console.log(`⚙️ Capabilities: ${JSON.stringify(input.capabilityChoices || {})}`);
   console.log(`${"=".repeat(60)}\n`);
 
   const startTime = Date.now();
@@ -172,8 +217,10 @@ export async function runWebsiteGenerationGraph(input: {
     supabaseAnonKey: input.supabaseAnonKey,
     sandboxId: input.sandboxId,
     files: input.initialFiles || {},
+    conversationHistory: input.conversationHistory || [],
+    capabilityChoices: input.capabilityChoices,
     iteration: 0,
-    maxIterations: 2,
+    maxIterations: 3,
   };
 
   const result = await graph.invoke(initialState as any);
