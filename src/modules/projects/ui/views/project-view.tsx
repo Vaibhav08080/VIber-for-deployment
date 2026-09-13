@@ -82,11 +82,11 @@ export const ProjectView = ({ projectId }: Props) => {
           className="flex flex-col min-h-0"
         >
           <Tabs
-            className="h-full gap-y-0"
+            className="flex flex-col flex-1 h-full min-h-0 gap-y-0"
             value={tabstate}
             onValueChange={(value) => setTabstate(value as "preview" | "code")}
           >
-            <div className="w-full flex items-center p-2 border-b gap-x-2">
+            <div className="w-full flex items-center p-2 border-b gap-x-2 flex-shrink-0">
               <TabsList className="h-8 p-0 border rounded-md">
                 <TabsTrigger value="preview" className="rounded-md">
                   <EyeIcon /> <span>demo</span>
@@ -108,7 +108,7 @@ export const ProjectView = ({ projectId }: Props) => {
               </div>
              
             </div>
-            <TabsContent value="preview" className="h-full">
+            <TabsContent value="preview" className="flex-1 min-h-0 h-full data-[state=active]:flex data-[state=active]:flex-col m-0 p-0 border-0">
             {isWaitingForAI ? (
               <div className="h-full flex flex-col items-center justify-center p-6">
                 <MessageLoading projectId={projectId} />
@@ -123,7 +123,7 @@ export const ProjectView = ({ projectId }: Props) => {
               </div>
             )}
             </TabsContent>
-            <TabsContent value="code" className="min-h-0 h-full">
+            <TabsContent value="code" className="flex-1 min-h-0 h-full data-[state=active]:flex data-[state=active]:flex-col m-0 p-0 border-0">
             {!!activeFragment?.files ? (
                 <FileExplorer files={activeFragment.files as {[path: string]: string}}/>
             ) : (

@@ -14,7 +14,10 @@ export const FragmentWeb = ({ data }: Props) => {
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
 
+    const [isLoading, setIsLoading] = useState(true);
+
     const onRefresh = () => {
+        setIsLoading(true);
         setFragmentKey((prev) => prev + 1);
     }
 
@@ -34,7 +37,6 @@ export const FragmentWeb = ({ data }: Props) => {
             const files = data.files as { [path: string]: string };
 
             for (const [filePath, content] of Object.entries(files)) {
-                // Strip leading slash if present
                 const normalizedPath = filePath.startsWith("/")
                     ? filePath.slice(1)
                     : filePath;
@@ -58,52 +60,64 @@ export const FragmentWeb = ({ data }: Props) => {
     };
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="p-2 border-b bg-sidebar flex items-center gap-x-2">
+    <div className="flex flex-col w-full h-full flex-1 min-h-0 bg-background">
+      <div className="p-2 border-b bg-sidebar flex items-center gap-x-2 flex-shrink-0">
         <Hint text="Refresh" side="bottom">
-        <Button size="sm" variant="outline" onClick={onRefresh}>
-          <RefreshCcwIcon />
-        </Button>
+          <Button size="sm" variant="outline" onClick={onRefresh}>
+            <RefreshCcwIcon className={isLoading ? "animate-spin" : ""} />
+          </Button>
         </Hint>
         <Hint text="Click to copy" side="bottom">
-        <Button size="sm"
-         variant="outline" 
-         onClick={handleCopy}
-         disabled={!data.sandboxUrl || copied}
-         className="flex-1 justify-start text-start font-normal">
-          <span className="truncate">{data.sandboxUrl}</span>
-        </Button>
+          <Button
+            size="sm"
+            variant="outline" 
+            onClick={handleCopy}
+            disabled={!data.sandboxUrl || copied}
+            className="flex-1 justify-start text-start font-normal truncate font-mono text-xs"
+          >
+            <span className="truncate">{data.sandboxUrl}</span>
+          </Button>
         </Hint>
         <Hint text="Open in a new tab" side="bottom" align="start">
-        <Button
-        size="sm"
-        disabled={!data.sandboxUrl}
-        variant="outline"
-        onClick={() => {
-            if (!data.sandboxUrl) return;
-            window.open(data.sandboxUrl, "_blank");
-        }}>
-          <ExternalLinkIcon/>
-        </Button>
+          <Button
+            size="sm"
+            disabled={!data.sandboxUrl}
+            variant="outline"
+            onClick={() => {
+              if (!data.sandboxUrl) return;
+              window.open(data.sandboxUrl, "_blank");
+            }}
+          >
+            <ExternalLinkIcon className="size-4" />
+          </Button>
         </Hint>
         <Hint text="Download as ZIP" side="bottom" align="end">
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={!data.files || downloading}
-          onClick={handleDownload}
-        >
-          <DownloadIcon className={downloading ? "animate-bounce" : ""} />
-        </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!data.files || downloading}
+            onClick={handleDownload}
+          >
+            <DownloadIcon className={downloading ? "animate-bounce" : "size-4"} />
+          </Button>
         </Hint>
       </div>
-      <iframe
-        key={fragmentKey}
-        className="w-full h-full bg-white dark:bg-zinc-950"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-        loading="lazy"
-        src={data.sandboxUrl}
-      ></iframe>
+
+      <div className="relative flex-1 min-h-0 w-full h-full bg-zinc-950">
+        {isLoading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/80 backdrop-blur-sm z-10 text-muted-foreground">
+            <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+            <p className="text-xs font-medium">Connecting to Next.js preview...</p>
+          </div>
+        )}
+        <iframe
+          key={fragmentKey}
+          className="w-full h-full border-0"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+          src={data.sandboxUrl}
+          onLoad={() => setIsLoading(false)}
+        />
+      </div>
     </div>
   );
 };
