@@ -114,6 +114,12 @@ export function sanitizeClientComponents(
       }
     }
 
+    // --- Fix 5: Strip invalid metadata export in "use client" components ---
+    if (content.includes('"use client"') || content.includes("'use client'")) {
+      content = content.replace(/export\s+const\s+metadata\s*:\s*Metadata\s*=\s*\{[\s\S]*?\};?/g, "");
+      content = content.replace(/export\s+const\s+metadata\s*=\s*\{[\s\S]*?\};?/g, "");
+    }
+
     sanitized[path] = content;
   }
 

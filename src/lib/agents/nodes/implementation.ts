@@ -114,8 +114,8 @@ export async function implementationAgentNode(state: WebsiteState): Promise<Part
       ? `Generate the main entry point 'app/page.tsx' that:
 1. Has "use client"; on the VERY FIRST LINE
 2. Imports and renders ALL of these components in order: ${generatedComponentNames.join(", ")}
-3. Sets up the page with proper bg-[#09090b] background
-4. Uses Next.js metadata export for SEO title and description`
+3. Sets up the page with proper min-h-screen bg-[#09090b] text-white
+4. DO NOT export metadata from app/page.tsx because it is a Client Component ("use client"). Metadata is handled in app/layout.tsx.`
       : filePath === "lib/mock-data.ts"
       ? `Generate 'lib/mock-data.ts' with rich, realistic mock data arrays for this product.
 Include at least 6-8 items with realistic names, descriptions, prices, ratings, images (Unsplash URLs), etc.
