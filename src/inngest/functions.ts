@@ -6,7 +6,7 @@ import OpenAI from "openai";
 import { pushFilesToGitHubRepo } from "@/lib/github";
 import { clerkClient } from "@clerk/nextjs/server";
 import { SHADCN_UI_FILES } from "@/lib/shadcn-suite";
-import { runWebsiteGenerationGraph } from "@/lib/agents/graph";
+import { generateBulletproofWebsite } from "@/lib/agents/generator";
 import { reportProgress } from "@/lib/agents/utils";
 import { sendWebsiteReadyEmail } from "@/lib/email";
 
@@ -142,9 +142,9 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
       });
     });
 
-    // --- 4. Execute LangGraph Stateful Multi-Agent Pipeline ---
-    const agentResult = await step.run("run-langgraph-multi-agent", async () => {
-      return await runWebsiteGenerationGraph({
+    // --- 4. Execute High-Reliability Website Generation Pipeline ---
+    const agentResult = await step.run("run-bulletproof-generator", async () => {
+      return await generateBulletproofWebsite({
         projectId: event.data.projectId,
         prompt: event.data.value,
         imageUrl: event.data.imageUrl,
@@ -153,18 +153,15 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
         supabaseAnonKey: projectDb?.supabaseAnonKey || undefined,
         sandboxId: SandboxId,
         initialFiles: existingFiles,
-        conversationHistory: event.data.conversationHistory || [],   // NEW: edit context
-        capabilityChoices: (projectDb?.capabilityChoices as any) || event.data.capabilityChoices || undefined, // NEW: backend prefs
+        conversationHistory: event.data.conversationHistory || [],
+        capabilityChoices: (projectDb?.capabilityChoices as any) || event.data.capabilityChoices || undefined,
       });
     });
 
-
     // --- 5. Determine Sandbox Preview Host ---
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
-      await reportProgress(event.data.projectId, "Building your app preview...", "RUNNING");
       const sandbox = await getSandbox(SandboxId);
       const host = sandbox.getHost(3000);
-      await reportProgress(event.data.projectId, "Building your app preview...", "DONE");
       return `https://${host}`;
     });
 

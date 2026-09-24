@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config();
 
 import { Sandbox } from "@e2b/code-interpreter";
-import { runWebsiteGenerationGraph } from "../src/lib/agents/graph";
+import { generateBulletproofWebsite } from "../src/lib/agents/generator";
 
 async function runLocalAgentTest() {
   const prompt = process.argv.slice(2).join(" ") || "Build a high-end luxury watch boutique with dark glassmorphism, product catalog, customer reviews, and an interactive shopping cart";
@@ -27,15 +27,10 @@ async function runLocalAgentTest() {
   });
   console.log(`✅ Sandbox created successfully! ID: ${sandbox.sandboxId}\n`);
 
-  console.log("🤖 [2/4] Starting LangGraph Multi-Agent Workflow...");
-  console.log("   - Product Planner -> Capability Planner");
-  console.log("   - Design Agent + Research Agent + Content Agent (Parallel Strategy)");
-  console.log("   - Architecture Agent -> Implementation Agent");
-  console.log("   - Browser Inspection -> Website Judge (Score >= 8.5) -> Fix Loop\n");
-
+  console.log("🤖 [2/4] Starting Bulletproof Website Generator...");
   const startTime = Date.now();
 
-  const result = await runWebsiteGenerationGraph({
+  const result = await generateBulletproofWebsite({
     projectId: "local-test-project-" + Date.now(),
     prompt: prompt,
     sandboxId: sandbox.sandboxId,

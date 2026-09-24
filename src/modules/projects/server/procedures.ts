@@ -139,14 +139,15 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             // BUILD mode: trigger Inngest for code generation
             await inngest.send({
                 name: "code-agent/run",
-                    data: {
-                      value: input.value,
-                      projectId: CreatedProject.id,
-                      mode: input.mode,
-                    },
-
-                });
-                return CreatedProject;
+                data: {
+                  value: input.value,
+                  projectId: CreatedProject.id,
+                  mode: input.mode,
+                  imageUrl: input.imageUrl,
+                  conversationHistory: [],
+                },
+            });
+            return CreatedProject;
 
             }),
     rename: protectedProcedure

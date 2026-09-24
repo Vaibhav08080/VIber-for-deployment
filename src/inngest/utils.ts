@@ -185,14 +185,14 @@ export async function autoInstallMissingPackages(
 }
 
 /**
- * Ensures the Next.js dev server is actively running on port 3000 in the E2B sandbox.
+ * Ensures the Next.js dev server is actively running on port 3000 in the E2B sandbox bound to 0.0.0.0.
  */
 export async function ensureNextjsServerRunning(sandbox: Sandbox): Promise<boolean> {
   try {
     // 1. Fast check if server is already responding
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const check = await sandbox.commands.run(
-        "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || true",
+        "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000 || true",
         { timeoutMs: 3000 }
       );
       const code = check.stdout?.trim();
@@ -200,49 +200,29 @@ export async function ensureNextjsServerRunning(sandbox: Sandbox): Promise<boole
         console.log(`[E2B] Next.js dev server is healthy (HTTP ${code})`);
         return true;
       }
-      await new Promise((r) => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 800));
     }
 
-    // 2. Check if a next process is actively compiling
-    const psCheck = await sandbox.commands.run("ps aux | grep 'next' | grep -v 'grep' || true");
-    const hasNextProcess = (psCheck.stdout || "").includes("next");
-
-    if (hasNextProcess) {
-      console.log(`[E2B] Next.js process is active, waiting up to 6s for Turbopack compilation...`);
-      for (let i = 0; i < 6; i++) {
-        await new Promise((r) => setTimeout(r, 1000));
-        const verify = await sandbox.commands.run(
-          "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || true",
-          { timeoutMs: 3000 }
-        );
-        const vCode = verify.stdout?.trim();
-        if (vCode === "200" || vCode === "304" || vCode === "307" || vCode === "308") {
-          console.log(`[E2B] Next.js dev server responded (HTTP ${vCode})`);
-          return true;
-        }
-      }
-    }
-
-    // 3. Process is dead or hung: restart with cwd: '/home/user' and background: true
-    console.log(`[E2B] Starting Next.js dev server in /home/user with background: true...`);
+    // 2. Kill any hung next processes and restart with 0.0.0.0 host binding
+    console.log(`[E2B] Starting Next.js dev server in /home/user (0.0.0.0:3000)...`);
     await sandbox.commands.run("pkill -9 -f 'next' || true");
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 400));
 
-    await sandbox.commands.run("npx next dev --turbopack -p 3000", {
+    await sandbox.commands.run("npx next dev --turbopack -H 0.0.0.0 -p 3000", {
       cwd: "/home/user",
       background: true,
     });
 
-    // 4. Poll until port 3000 is ready
-    for (let i = 0; i < 8; i++) {
+    // 3. Poll until port 3000 is ready and pre-warm the root page
+    for (let i = 0; i < 12; i++) {
       await new Promise((r) => setTimeout(r, 1000));
       const verify = await sandbox.commands.run(
-        "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000 || true",
+        "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000 || true",
         { timeoutMs: 3000 }
       );
       const vCode = verify.stdout?.trim();
       if (vCode === "200" || vCode === "304" || vCode === "307" || vCode === "308") {
-        console.log(`[E2B] Next.js dev server is LIVE on port 3000!`);
+        console.log(`[E2B] Next.js dev server is LIVE and compiled on 0.0.0.0:3000!`);
         return true;
       }
     }

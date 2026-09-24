@@ -44,15 +44,9 @@ export async function ConsumeCredits() {
   if (!userId) {
     throw new Error("Unauthorized");
   }
-  try {
-    const usageTracker = await getUsageTracker();
-    if (!usageTracker) return null;
-    const result = await usageTracker.consume(userId, GENERATION_COST);
-    return result;
-  } catch (error) {
-    console.error("Failed to consume credits:", error);
-    return null;
-  }
+  const usageTracker = await getUsageTracker();
+  if (!usageTracker) return null;
+  return await usageTracker.consume(userId, GENERATION_COST);
 }
 
 export async function getUsageStatus() {
