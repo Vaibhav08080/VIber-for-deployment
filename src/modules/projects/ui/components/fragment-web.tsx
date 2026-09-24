@@ -17,14 +17,13 @@ export const FragmentWeb = ({ data }: Props) => {
     const [timedOut, setTimedOut] = useState(false);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Auto-dismiss spinner after 30s if onLoad never fires (E2B sandbox cold start)
+    // Auto-dismiss loading overlay quickly (3s) so the preview is never blocked
     useEffect(() => {
         setIsLoading(true);
         setTimedOut(false);
         timeoutRef.current = setTimeout(() => {
             setIsLoading(false);
-            setTimedOut(true);
-        }, 30000);
+        }, 3000);
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };

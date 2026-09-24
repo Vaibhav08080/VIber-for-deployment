@@ -242,6 +242,192 @@ export function AccordionItem({ title, children, isOpen, onToggle }: any) {
 }
 `,
 
+  "components/ui/button.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "default", size = "default", ...props }, ref) => {
+    const variants: Record<string, string> = {
+      default: "bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 shadow-sm",
+      destructive: "bg-red-500 text-white hover:bg-red-600 shadow-sm",
+      outline: "border border-neutral-200 dark:border-neutral-800 bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100",
+      secondary: "bg-neutral-100 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700",
+      ghost: "hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100",
+      link: "text-neutral-900 dark:text-neutral-100 underline-offset-4 hover:underline",
+    };
+    const sizes: Record<string, string> = {
+      default: "h-9 px-4 py-2 text-sm",
+      sm: "h-8 rounded-lg px-3 text-xs",
+      lg: "h-11 rounded-xl px-8 text-base",
+      icon: "h-9 w-9 p-0",
+    };
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neutral-400 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+          variants[variant] || variants.default,
+          sizes[size] || sizes.default,
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+Button.displayName = "Button";
+`,
+
+  "components/ui/card.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md text-neutral-950 dark:text-neutral-50 shadow-sm transition-all duration-200",
+        className
+      )}
+      {...props}
+    />
+  );
+}
+
+export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("flex flex-col space-y-1.5 p-6", className)} {...props} />;
+}
+
+export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  return <h3 className={cn("text-lg font-bold leading-none tracking-tight", className)} {...props} />;
+}
+
+export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
+  return <p className={cn("text-sm text-neutral-500 dark:text-neutral-400", className)} {...props} />;
+}
+
+export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("p-6 pt-0", className)} {...props} />;
+}
+
+export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("flex items-center p-6 pt-0", className)} {...props} />;
+}
+`,
+
+  "components/ui/input.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          "flex h-10 w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Input.displayName = "Input";
+`,
+
+  "components/ui/textarea.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
+  ({ className, ...props }, ref) => {
+    return (
+      <textarea
+        className={cn(
+          "flex min-h-[80px] w-full rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-3 py-2 text-sm placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Textarea.displayName = "Textarea";
+`,
+
+  "components/ui/label.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
+  return (
+    <label
+      className={cn("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-900 dark:text-neutral-100", className)}
+      {...props}
+    />
+  );
+}
+`,
+
+  "components/ui/switch.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export function Switch({ checked = false, onCheckedChange, className = "" }: any) {
+  const [isOn, setIsOn] = React.useState(checked);
+  const active = onCheckedChange ? checked : isOn;
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={active}
+      onClick={() => {
+        setIsOn(!active);
+        onCheckedChange?.(!active);
+      }}
+      className={cn(
+        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400",
+        active ? "bg-neutral-900 dark:bg-white" : "bg-neutral-200 dark:bg-neutral-800",
+        className
+      )}
+    >
+      <span
+        className={cn(
+          "pointer-events-none inline-block h-5 w-5 rounded-full bg-white dark:bg-neutral-900 shadow-lg ring-0 transition-transform",
+          active ? "translate-x-5" : "translate-x-0"
+        )}
+      />
+    </button>
+  );
+}
+`,
+
+  "components/ui/progress.tsx": `"use client";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export function Progress({ value = 0, className = "" }: { value?: number; className?: string }) {
+  return (
+    <div className={cn("relative h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800", className)}>
+      <div
+        className="h-full w-full flex-1 bg-neutral-900 dark:bg-white transition-all duration-300"
+        style={{ transform: \`translateX(-\${100 - (value || 0)}%)\` }}
+      />
+    </div>
+  );
+}
+`,
+
   "components/ui/separator.tsx": `"use client";
 import * as React from "react";
 
