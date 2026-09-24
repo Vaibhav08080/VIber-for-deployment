@@ -207,36 +207,61 @@ Provide clear, structured, technical, and helpful answers. Use bullet points and
             })
         )
         .mutation(async ({ input }) => {
-            const { client: aiClient, model: aiModel } = getGroqClient();
-            const response = await aiClient.chat.completions.create({
-                model: aiModel,
-                messages: [
-                    {
-                        role: "system",
-                        content: `You are an expert prompt engineer for SparkSite — a Next.js 15 App Router AI web application builder.
+            try {
+                const { client: aiClient, model: aiModel } = getGroqClient();
+                const response = await aiClient.chat.completions.create({
+                    model: aiModel,
+                    messages: [
+                        {
+                            role: "system",
+                            content: `You are an expert prompt engineer for SparkSite — a Next.js 15 App Router AI web application builder.
 Your job is to take a user's rough idea and enhance it into a crisp, high-performing specification prompt for building a Next.js 15 application.
 
 STRICT ENVIRONMENT & ARCHITECTURE CONSTRAINTS:
 - Tech Stack: Next.js 15 App Router, React 19, Tailwind CSS, Lucide React, Framer Motion animations, Recharts analytics, and Zustand / Local Storage state management (or Supabase if database is mentioned).
-- ABSOLUTELY NEVER mention MongoDB, Express, Node.js standalone servers, Vue, Angular, or PHP.
 - Focus on UI/UX components: Hero section with call-to-action, interactive catalog with search/category filters, slide-over shopping cart drawer, dark/light glassmorphism aesthetics, responsive layouts, and rich seed data.
 - Keep it concise, action-oriented, and high-performance (2-4 sentences max).
 - Output ONLY the enhanced prompt string — no explanations, no preamble, no quotes.`,
-                    },
-                    {
-                        role: "user",
-                        content: input.prompt,
-                    },
-                ],
-                temperature: 0.7,
-                max_tokens: 500,
-            });
+                        },
+                        {
+                            role: "user",
+                            content: input.prompt,
+                        },
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500,
+                });
 
-            const enhanced = response.choices[0]?.message?.content?.trim();
-            if (!enhanced) {
-                throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Enhancement failed" });
+                const enhanced = response.choices[0]?.message?.content?.trim();
+                if (enhanced) {
+                    return { enhanced };
+                }
+            } catch (err) {
+                console.warn("[EnhancePrompt] Groq error, attempting OpenAI fallback:", err);
             }
-            return { enhanced };
+
+            // Fallback to OpenAI directly
+            try {
+                const { getOpenAIClient } = await import("@/lib/agents/utils");
+                const openai = getOpenAIClient();
+                const fbRes = await openai.chat.completions.create({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "Enhance the user's web prompt into a crisp Next.js specification (2-3 sentences max). Output ONLY the enhanced prompt.",
+                        },
+                        { role: "user", content: input.prompt },
+                    ],
+                    max_tokens: 300,
+                });
+                const enhanced = fbRes.choices[0]?.message?.content?.trim();
+                if (enhanced) return { enhanced };
+            } catch (fbErr) {
+                console.error("[EnhancePrompt] Fallback failed:", fbErr);
+            }
+
+            return { enhanced: input.prompt };
         }),
     saveCapabilityChoices: protectedProcedure
         .input(
