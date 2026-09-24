@@ -1,5 +1,5 @@
 import { Fragment } from "@prisma/client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ExternalLinkIcon, RefreshCcwIcon, DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hint } from "./hint";
@@ -13,11 +13,32 @@ export const FragmentWeb = ({ data }: Props) => {
     const [fragmentKey, setFragmentKey] = useState(0);
     const [copied, setCopied] = useState(false);
     const [downloading, setDownloading] = useState(false);
-
     const [isLoading, setIsLoading] = useState(true);
+    const [timedOut, setTimedOut] = useState(false);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Auto-dismiss spinner after 30s if onLoad never fires (E2B sandbox cold start)
+    useEffect(() => {
+        setIsLoading(true);
+        setTimedOut(false);
+        timeoutRef.current = setTimeout(() => {
+            setIsLoading(false);
+            setTimedOut(true);
+        }, 30000);
+        return () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+    }, [fragmentKey, data.sandboxUrl]);
+
+    const handleLoadComplete = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        setIsLoading(false);
+        setTimedOut(false);
+    };
 
     const onRefresh = () => {
         setIsLoading(true);
+        setTimedOut(false);
         setFragmentKey((prev) => prev + 1);
     }
 
@@ -108,6 +129,20 @@ export const FragmentWeb = ({ data }: Props) => {
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/80 backdrop-blur-sm z-10 text-muted-foreground">
             <div className="size-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             <p className="text-xs font-medium">Connecting to Next.js preview...</p>
+            <p className="text-xs text-zinc-500">Sandbox is booting up, please wait...</p>
+          </div>
+        )}
+        {!isLoading && timedOut && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950 z-10 text-muted-foreground">
+            <div className="size-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-2xl">⏱️</div>
+            <p className="text-sm font-medium text-zinc-300">Sandbox is warming up</p>
+            <p className="text-xs text-zinc-500 text-center max-w-xs">
+              The preview sandbox took too long to respond. Click Refresh to try again.
+            </p>
+            <Button size="sm" variant="outline" onClick={onRefresh} className="mt-1 gap-2">
+              <RefreshCcwIcon className="size-3.5" />
+              Refresh Preview
+            </Button>
           </div>
         )}
         <iframe
@@ -115,7 +150,8 @@ export const FragmentWeb = ({ data }: Props) => {
           className="w-full h-full border-0"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
           src={data.sandboxUrl}
-          onLoad={() => setIsLoading(false)}
+          onLoad={handleLoadComplete}
+          onError={handleLoadComplete}
         />
       </div>
     </div>
